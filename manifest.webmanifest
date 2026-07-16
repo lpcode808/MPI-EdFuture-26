@@ -1,0 +1,14 @@
+{
+  "name": "2026 EdFuture Summit Pocket Program",
+  "short_name": "EdFuture 2026",
+  "description": "A private, device-local pocket program for the 2026 Mid-Pacific EdFuture Summit.",
+  "start_url": "./#agenda",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbfcfa",
+  "theme_color": "#005749",
+  "icons": [
+    { "src": "./assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
+

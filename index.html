@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#005749">
+    <meta name="description" content="An unofficial pocket program for the 2026 Mid-Pacific EdFuture Summit, July 21–22 in Honolulu.">
+    <meta property="og:title" content="2026 EdFuture Summit pocket program">
+    <meta property="og:description" content="Browse the two-day public program and save a personal plan on your device.">
+    <meta property="og:url" content="https://lpcode808.github.io/MPI-EdFuture-26/">
+    <meta property="og:image" content="https://lpcode808.github.io/MPI-EdFuture-26/assets/brand/edfuturesummit-banner.webp">
+    <title>2026 EdFuture Summit · Pocket Program</title>
+    <link rel="icon" href="./assets/icons/favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to program</a>
+
+    <header class="site-header">
+      <a class="brand" href="#agenda" aria-label="EdFuture Summit program home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span><b>EdFuture</b><small>July 21–22 · Mid-Pacific</small></span>
+      </a>
+      <a class="source-link" href="https://events.humanitix.com/2026edfuturesummit" target="_blank" rel="noreferrer"><span class="source-long">Official listing</span><span class="source-short">Official</span> <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="event-title">
+        <div class="hero-art">
+          <img src="./assets/brand/edfuturesummit-banner.webp" alt="Third Annual Mid-Pacific EdFuture Summit, July 21–22, 2026">
+        </div>
+        <div class="hero-copy">
+          <p class="eyebrow">Unofficial pocket program</p>
+          <h1 id="event-title">Two days.<br><em>One shared future.</em></h1>
+          <p class="hero-deck">Education, industry, and community meet at Mid-Pacific to shape what learning with AI becomes next.</p>
+          <dl class="event-facts">
+            <div><dt>When</dt><dd>July 21–22, 2026</dd></div>
+            <div><dt>Where</dt><dd>Mid-Pacific Institute · Honolulu</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="guide-shell" aria-label="Conference guide">
+        <div class="tab-wrap">
+          <div class="tabs" role="tablist" aria-label="Guide sections">
+            <button id="tab-agenda" role="tab" aria-selected="true" aria-controls="panel-agenda" tabindex="0">Program</button>
+            <button id="tab-saved" role="tab" aria-selected="false" aria-controls="panel-saved" tabindex="-1">My plan <span id="savedCount" class="count" aria-label="0 saved">0</span></button>
+            <button id="tab-info" role="tab" aria-selected="false" aria-controls="panel-info" tabindex="-1">Info</button>
+          </div>
+        </div>
+
+        <section id="panel-agenda" class="panel" role="tabpanel" aria-labelledby="tab-agenda">
+          <div class="program-tools">
+            <label class="search-field">
+              <span class="visually-hidden">Search the program</span>
+              <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+              <input id="agendaSearch" type="search" autocomplete="off" placeholder="Search sessions, people, or rooms">
+            </label>
+            <div id="dayFilters" class="day-filters" aria-label="Choose a day"></div>
+          </div>
+          <p id="agendaStatus" class="status-line" aria-live="polite"></p>
+          <div id="agendaList"></div>
+        </section>
+
+        <section id="panel-saved" class="panel" role="tabpanel" aria-labelledby="tab-saved" hidden>
+          <header class="section-heading">
+            <p class="eyebrow">Stored only in this browser</p>
+            <h2>Your summit, at a glance</h2>
+            <p>Save program items and add private notes. Nothing is sent to a server.</p>
+          </header>
+          <div id="savedList"></div>
+          <label class="notes-field quick-notes">
+            <span>Quick notes</span>
+            <textarea id="quickNotes" rows="6" placeholder="Questions, people to find, ideas to bring back…"></textarea>
+            <small id="notesStatus" aria-live="polite">Saved on this device.</small>
+          </label>
+          <div class="data-actions">
+            <button id="exportButton" class="button secondary" type="button">Export backup</button>
+            <label class="button secondary">Import backup<input id="importInput" type="file" accept="application/json" hidden></label>
+          </div>
+          <p id="importStatus" class="status-line" aria-live="polite"></p>
+        </section>
+
+        <section id="panel-info" class="panel" role="tabpanel" aria-labelledby="tab-info" hidden>
+          <div class="info-layout">
+            <article class="info-main">
+              <p class="eyebrow">Where education meets what’s next</p>
+              <h2>Built for conversation across roles.</h2>
+              <p>The EdFuture Summit brings education, industry, and community together around the changing landscape of AI and the future of learning.</p>
+              <p>The published program moves between shared talks in Bakken Auditorium and participatory activities in Wood Hall.</p>
+              <a class="button primary" href="https://events.humanitix.com/2026edfuturesummit" target="_blank" rel="noreferrer">View official event page <span aria-hidden="true">↗</span></a>
+            </article>
+            <aside class="source-note">
+              <h3>About this guide</h3>
+              <p>This unofficial attendee guide uses only the two public program images supplied for the event and the public Humanitix listing.</p>
+              <p>Names appear only when printed in those sources. No attendee list, contact details, analytics, account, or backend is included.</p>
+              <details>
+                <summary>Source status</summary>
+                <p id="sourceStatus"></p>
+              </details>
+              <dl>
+                <div><dt>Storage</dt><dd>Device-local</dd></div>
+                <div><dt>Program items</dt><dd id="sessionCount">29</dd></div>
+                <div><dt>Last reviewed</dt><dd id="lastUpdated">July 16, 2026</dd></div>
+              </dl>
+            </aside>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      <p>Unofficial attendee guide · Event details remain subject to the official organizer’s updates.</p>
+      <button id="shareButton" type="button">Share this guide</button>
+    </footer>
+
+    <template id="sessionTemplate">
+      <article class="session-row">
+        <div class="session-time"></div>
+        <div class="session-body">
+          <div class="session-topline"><span class="kind-label"></span><span class="room"></span></div>
+          <h3></h3>
+          <p class="people"></p>
+          <label class="notes-field session-notes" hidden>
+            <span>Private note</span>
+            <textarea rows="3" placeholder="Add a note for this session…"></textarea>
+            <small>Saved on this device.</small>
+          </label>
+        </div>
+        <div class="session-actions">
+          <button class="save-button" type="button"><span class="visually-hidden">Save session</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6.5 4.5h11v16L12 17l-5.5 3.5z"></path></svg></button>
+          <button class="note-button" type="button" aria-expanded="false"><span class="visually-hidden">Add note</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 5h14v11H9l-4 3z"></path></svg></button>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

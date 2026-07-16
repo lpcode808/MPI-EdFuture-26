@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "sourceUrl": "https://events.humanitix.com/2026edfuturesummit",
+  "capturedAt": "2026-07-16T22:30:00Z",
+  "captureScope": "Public attendee-facing event facts only; checkout fields, transient page tokens, host account identifiers, and unrelated platform markup intentionally excluded.",
+  "facts": {
+    "title": "2026 EdFuture Summit",
+    "tagline": "Where education meets what's next.",
+    "summary": "A two-day summit where education, industry, and community come together to shape the future of learning AI.",
+    "startsAt": "2026-07-21T08:00:00-10:00",
+    "publishedOverallEnd": "2026-07-22T16:00:00-10:00",
+    "venue": "Mid-Pacific Institute",
+    "address": "2445 Kaala St, Honolulu, HI 96822, USA",
+    "host": "Mid-Pacific AI Advisory Council",
+    "registration": {
+      "dayOneUsd": 25,
+      "dayTwoUsd": 25,
+      "bothDaysUsd": 45,
+      "visibleStatusAtCapture": "Sales have stopped",
+      "includes": ["registered sessions", "lunch", "digital materials and resources after the summit"]
+    },
+    "theme": {
+      "primary": "#456d67",
+      "hover": "#3b635d",
+      "active": "#365e58",
+      "border": "#74928d"
+    },
+    "bannerUrl": "https://images.humanitix.com/i/149adbfc-1ac4-4b62-a852-5297799a94cb.png@responsive-1600.webp"
+  },
+  "knownConflicts": [
+    "The Humanitix event header/schema ends the overall event at 4pm on July 22, while description copy says Day 2 runs to 5pm.",
+    "The Day 1 overview says 8am–3pm, while the supplied program image includes a 3:10pm session and no end time.",
+    "The page says both 'Register today' and 'Sales have stopped'; the guide links to the official page without claiming tickets are available."
+  ]
+}
+
