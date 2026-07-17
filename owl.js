@@ -201,15 +201,22 @@ export function openOwlMode(store) {
     return nodes.find((node) => node.c === c && node.r === r);
   }
 
+  // Re-rendering only when the underfoot tile changes keeps the aria-live
+  // region from announcing every empty step to screen readers.
+  let dialogKey = null;
+
   function updateDialog() {
-    dialog.replaceChildren();
     const node = nodeAt(position.c, position.r);
+    const key = node ? node.session.id : "hint";
+    if (key === dialogKey) return;
+    dialogKey = key;
+    dialog.replaceChildren();
     if (!node) {
       const hint = document.createElement("p");
       hint.className = "owl-line";
       hint.textContent = notedCount
-        ? `HOOT! ${notedCount} of ${nodes.length} pages hold your notes. Follow the gold arrow and land on a glowing page to read one.`
-        : `HOOT! No notes on these pages yet — notes you write in the guide appear here. Explore!`;
+        ? `HOOT! Each book below is a program item — ${notedCount} of ${nodes.length} hold your notes. Follow the gold arrow to a glowing page and land on it to read.`
+        : `HOOT! This is the summit program as a night overworld — every book is a program item. Land on one to peek, and notes you write in the guide will glow here.`;
       dialog.append(hint);
       return;
     }
@@ -247,7 +254,7 @@ export function openOwlMode(store) {
 
   const notedNodes = nodes.filter((node) => (notes[node.session.id] || "").trim());
 
-  // Edge compass: when every noted page is off-camera, point at the nearest one.
+  // Edge compass: when the nearest noted page is off-camera, point at it.
   function updateCompass() {
     if (!notedNodes.length) {
       compass.hidden = true;
@@ -325,15 +332,32 @@ export function openOwlMode(store) {
   overlay.querySelectorAll(".owl-dpad button").forEach((button) => {
     const dx = Number(button.dataset.dx);
     const dy = Number(button.dataset.dy);
-    const stop = () => clearInterval(holdTimer);
+    // Pointer presses step immediately and repeat while held. Keyboard and
+    // screen-reader activation arrive as bare `click` events with no pointer
+    // phase, so `click` must also move — but skip it right after a pointer
+    // press or mouse users would step twice.
+    let viaPointer = false;
+    const stop = () => {
+      clearInterval(holdTimer);
+      setTimeout(() => { viaPointer = false; }, 0);
+    };
     button.addEventListener("pointerdown", (event) => {
       event.preventDefault();
+      viaPointer = true;
       move(dx, dy);
       clearInterval(holdTimer);
       holdTimer = setInterval(() => move(dx, dy), 170);
     });
     ["pointerup", "pointercancel", "pointerleave"].forEach((type) => button.addEventListener(type, stop));
+    button.addEventListener("click", () => {
+      if (viaPointer) return;
+      move(dx, dy);
+    });
   });
+
+  // Everything behind the modal goes inert so keyboard and screen-reader
+  // focus cannot wander the guide underneath it.
+  const inertTargets = [...document.body.children].filter((el) => el !== overlay && el.tagName !== "SCRIPT");
 
   function close() {
     clearInterval(holdTimer);
@@ -341,6 +365,7 @@ export function openOwlMode(store) {
     window.removeEventListener("resize", place);
     overlay.remove();
     overlay = null;
+    inertTargets.forEach((el) => el.removeAttribute("inert"));
     document.body.style.overflow = previousOverflow;
     previousFocus?.focus?.();
   }
@@ -351,6 +376,7 @@ export function openOwlMode(store) {
 
   document.body.style.overflow = "hidden";
   document.body.append(overlay);
+  inertTargets.forEach((el) => el.setAttribute("inert", ""));
   place();
   overlay.querySelector(".owl-close").focus();
 }
@@ -416,7 +442,9 @@ function injectStyles() {
   cursor: pointer;
 }
 .owl-close:hover { background: #1d3f30; }
-.owl-viewport { position: relative; flex: 1; overflow: hidden; }
+/* min-height keeps the map visible on short landscape phones, where flex:1
+   over absolutely-positioned content would otherwise collapse toward zero. */
+.owl-viewport { position: relative; flex: 1; overflow: hidden; min-height: 32vh; }
 .owl-world {
   position: absolute;
   top: 0;
@@ -511,10 +539,18 @@ function injectStyles() {
   box-shadow: inset 0 0 0 3px #0a1030;
   overflow-y: auto;
 }
-.owl-line { margin: 0 0 0.55rem; font-size: 0.55rem; line-height: 1.8; }
-.owl-meta { color: #9fb4e8; }
+.owl-line { margin: 0 0 0.55rem; font-size: 0.6rem; line-height: 1.8; overflow-wrap: anywhere; }
+.owl-meta { color: #9fb4e8; font-size: 0.55rem; }
 .owl-session { color: #ffffff; }
-.owl-note { color: #ffd98a; }
+/* The note is the payoff of the whole egg — render it in a face that stays
+   readable at length instead of 9px pixel glyphs. */
+.owl-note {
+  color: #ffd98a;
+  font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
 .owl-note.is-empty { color: #8194cd; }
 .owl-dpad {
   display: grid;
@@ -542,6 +578,18 @@ function injectStyles() {
   .owl-bottom { flex-direction: column; }
   .owl-dpad { align-self: center; }
   .owl-dialog { min-height: 6rem; }
+}
+/* Landscape phones: shrink the chrome so the map keeps most of the screen. */
+@media (max-height: 30rem) {
+  .owl-dialog { min-height: 4.5rem; }
+  .owl-dpad { grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); }
+  .owl-bottom { padding-top: 0.5rem; padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+}
+/* The egg owns its reduced-motion guarantee rather than borrowing the
+   app-level reset, which could be rescoped without noticing this overlay. */
+@media (prefers-reduced-motion: reduce) {
+  .owl-world, .owl-sprite { transition: none; }
+  .owl-body, .owl-node.has-note, .owl-compass { animation: none; }
 }
 `;
   document.head.append(style);

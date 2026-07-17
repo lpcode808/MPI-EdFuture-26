@@ -117,6 +117,47 @@ Deliberately skipped: typewriter text reveal (a busy attendee re-reading her own
 instantly) and narrowing which kinds get map tiles (the main UI allows notes on any non-break
 item; the map mirrors that). Both are on record as intentional.
 
+## July 17 README + review + Night Flight pass (Fable, with Opus/Sonnet reviewers)
+
+README restructured: the live Pages URL is now the first line, the feature list leads,
+lineage/palette notes moved into the project-map section (and corrected to describe the
+dark scheme), `sw.js`/`manifest.webmanifest`/`owl.js` added to the map.
+
+Guide fixes from a Sonnet review pass:
+
+- Unsaving from the My plan tab no longer drops keyboard focus to `<body>` (the old
+  fallback targeted a button inside the hidden agenda panel; now falls back within the
+  visible panel, then the My plan tab).
+- Open session-note editors survive re-renders (open ids tracked in a Set outside the
+  render cycle), so a search keystroke or bookmark toggle no longer folds them shut.
+- Quick-notes caret no longer jumps to the end on unrelated re-renders.
+- Share button label reverts to "Share this guide" 4s after a clipboard copy.
+- Dead `.session-row:target` rule removed; `og:type` + `twitter:card` metas added;
+  "Last reviewed" bumped.
+
+Night Flight fixes from an Opus review pass:
+
+- **D-pad now moves on bare `click`** — keyboard and mobile-screen-reader activation
+  never fired the old `pointerdown`-only handlers; pointer presses still step
+  immediately and hold-repeat, with a flag to prevent double-steps.
+- `.brand` gets `touch-action: manipulation` (iOS double-tap zoom was eating the 5-tap
+  trigger) and taps 2–5 `preventDefault()` so a streak doesn't thrash tab/scroll state.
+- The note body renders in Source Serif at 0.95rem (the payoff was 9px pixel glyphs);
+  `overflow-wrap: anywhere` guards pasted URLs.
+- Page shell set `inert` behind the modal; restored on close.
+- Dialog re-renders only when the underfoot tile changes, so `aria-live` no longer
+  announces every empty step.
+- First-open hint now explains the overworld ("every book is a program item").
+- Explicit `prefers-reduced-motion` block inside `injectStyles` (previously honored
+  only via the app-global reset); `min-height` on the map viewport plus a short-screen
+  media query keep landscape phones playable; `modulepreload` for owl.js removes the
+  first-summon latency beat.
+
+Verified July 17 with Playwright/Chromium at 390×844 and 740×360: all of the above
+exercised end-to-end (focus retention, note-editor persistence, caret guard, 5-tap and
+"owl" triggers, d-pad `click()` movement, inert toggling, storage byte-identical after
+open/close). Only failed request was Google Fonts, blocked by the sandbox proxy.
+
 ## What remains
 
 1. Review the local result and commit/push only after explicit approval.

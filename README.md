@@ -9,7 +9,7 @@ This is an unofficial, mobile-first companion for the Third Annual Mid-Pacific E
 ## What you can do with it
 
 - Browse all 29 published program items across the two days
-- Search by title, printed presenter, room, or program type
+- Search by title, presenter, room, or program type
 - Filter to either day
 - Save a private personal plan
 - Add per-session and quick notes, stored only in your browser
@@ -60,6 +60,8 @@ styles.css                     brand-derived responsive visual system
 app.js                         tabs, search, filters, saved plan, notes, sharing
 owl.js                         a small surprise, loaded only if summoned
 storage.js                     versioned local persistence and normalization
+sw.js                          offline app-shell service worker
+manifest.webmanifest           installable-app metadata
 data/event.js                  public event facts and source status
 data/schedule.js               screenshot-transcribed program data
 scraped/                       public source evidence; never deployed
@@ -71,7 +73,7 @@ docs/                          architecture and privacy notes
 AGENT_HANDOFF.md               continuation state for future agents
 ```
 
-The app follows the modular, dependency-free architecture of `HIDOE-AI-26-app` and carries forward attendee patterns from the PCATT and KSEDTECH guides without copying their event content. Its visual system comes from the public EdFuture banner and program flyers: deep evergreen, muted sage, pale aqua, and warm paper.
+The app follows the modular, dependency-free architecture of `HIDOE-AI-26-app` and carries forward attendee patterns from the PCATT and KSEDTECH guides without copying their event content. Its night-mode visual system is drawn from the public EdFuture banner and program flyers: pale teal and sage accents on a deep evergreen ground. See `docs/architecture.md` for details.
 
 ## Deployment
 

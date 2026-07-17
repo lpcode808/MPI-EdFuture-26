@@ -116,6 +116,8 @@ img { display: block; max-width: 100%; }
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
+  /* Rapid taps must register as taps, not iOS double-tap zoom (night owls know why). */
+  touch-action: manipulation;
   color: var(--color-primary);
   font-family: var(--font-ui);
   text-decoration: none;
@@ -489,8 +491,6 @@ h1 em {
 }
 
 .session-list .session-row:first-child { border-top: 0; }
-
-.session-row:target { background: var(--color-mist); }
 
 .session-time {
   color: var(--color-primary);
