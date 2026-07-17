@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-pages.mjs",
-    "check": "node --check app.js && node --check storage.js && node --check data/event.js && node --check data/schedule.js && node --check scripts/build-pages.mjs && node scripts/validate-data.mjs && node scripts/storage-roundtrip.mjs && node scripts/static-smoke.mjs",
+    "check": "node --check app.js && node --check owl.js && node --check storage.js && node --check data/event.js && node --check data/schedule.js && node --check scripts/build-pages.mjs && node scripts/validate-data.mjs && node scripts/storage-roundtrip.mjs && node scripts/static-smoke.mjs",
     "test": "npm run check",
     "serve": "python3 -m http.server 4173"
   }

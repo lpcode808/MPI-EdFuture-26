@@ -8,6 +8,7 @@ const runtimeFiles = [
   "index.html",
   "styles.css",
   "app.js",
+  "owl.js",
   "storage.js",
   "sw.js",
   "manifest.webmanifest",

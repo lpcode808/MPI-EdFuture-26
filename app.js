@@ -212,6 +212,36 @@ document.querySelector("#shareButton").addEventListener("click", async () => {
 document.querySelector("#sourceStatus").textContent = EVENT.dataStatus.message;
 document.querySelector("#sessionCount").textContent = SESSIONS.length;
 
+// Easter egg: five quick taps on the brand mark (or typing "owl") opens the
+// Night Flight overworld. Loaded lazily so the base guide pays no cost.
+function summonOwl() {
+  import("./owl.js").then((module) => module.openOwlMode(store)).catch(() => {});
+}
+
+let owlTaps = 0;
+let owlTapTimer = 0;
+document.querySelector(".brand").addEventListener("click", () => {
+  owlTaps += 1;
+  clearTimeout(owlTapTimer);
+  owlTapTimer = setTimeout(() => { owlTaps = 0; }, 1500);
+  if (owlTaps >= 5) {
+    owlTaps = 0;
+    summonOwl();
+  }
+});
+
+let owlKeyBuffer = "";
+window.addEventListener("keydown", (event) => {
+  if (event.metaKey || event.ctrlKey || event.altKey) return;
+  if (event.target.closest?.("input, textarea, [contenteditable]")) return;
+  if (event.key.length !== 1) return;
+  owlKeyBuffer = (owlKeyBuffer + event.key.toLowerCase()).slice(-3);
+  if (owlKeyBuffer === "owl") {
+    owlKeyBuffer = "";
+    summonOwl();
+  }
+});
+
 function activateTabFromHash() {
   const requestedTab = tabs.find((tab) => tab.id === `tab-${location.hash.slice(1)}`);
   if (requestedTab) activateTab(requestedTab);

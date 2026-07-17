@@ -90,6 +90,15 @@ A second-agent review verified all 29 program items against the two source flyer
 
 `npm test`, `npm run build`, and Playwright checks (390px/1280px, focus behavior, offline reload) all pass after these edits.
 
+## July 16 evening pass (Claude, Justin's feedback round)
+
+- **Dark mode is now the default and only theme.** The token palette in `styles.css` was reworked to a night-evergreen scheme (`--color-paper: #0c1513` page, `--color-surface` for fields, light-teal `--color-primary` for accents, `--color-primary-strong` for button/filter fills). The official banner stays as white "poster" art intentionally — do not filter or invert it. `theme-color` meta and manifest colors updated to match.
+- Session note icon changed from a talk bubble to a note page in the `#sessionTemplate` SVG.
+- Footer credit added: "Created by TechZone at the Hawaii School for Girls at La Pietra" linking to the school's TechZone page.
+- **Easter egg — `owl.js` ("Night Flight"):** five quick taps on the brand mark or typing `owl` lazily imports a pixel-art overworld (an Owlgorithms Club nod). An owl flies (arrows/WASD, on-screen d-pad with hold-repeat) across a map of the non-break program items; landing on a page shows an FF-style dialog with the session, a ★ if saved, and the attendee's private note. It reads `store.get()` once on open and **never writes** — no schema change, no new storage keys. Esc or Return closes and restores focus. Press Start 2P font is injected only on first open.
+- Plumbing: `owl.js` added to the sw shell (cache bumped to `v4`), the build allowlist (dist is now 12 files), and `npm run check`.
+- Verified July 16: `npm test` + `npm run build` pass; Playwright against installed Chrome at 390px and 1280px — no console errors, `clientWidth === scrollWidth === 390`, both easter-egg triggers work, dialog surfaces a seeded note, Escape close leaves localStorage byte-identical.
+
 ## What remains
 
 1. Review the local result and commit/push only after explicit approval.
