@@ -158,6 +158,33 @@ exercised end-to-end (focus retention, note-editor persistence, caret guard, 5-t
 "owl" triggers, d-pad `click()` movement, inert toggling, storage byte-identical after
 open/close). Only failed request was Google Fonts, blocked by the sandbox proxy.
 
+## July 17 second pass: share QR, tap-to-fly, roadmap (Fable)
+
+- **Footer QR code** (`assets/brand/qr-guide.svg`, 2KB static SVG): a "Pass it on"
+  block above the footer copy with the code on a white card, caption, and the share
+  button. Generated once from the live Pages URL with the `qrcode` npm package
+  (error correction M, 2-module quiet zone) — a build-time artifact, no runtime
+  dependency. Decode-verified with jsQR against a rendered screenshot. Added to the
+  sw shell (cache `v6`), build allowlist (dist = 15 files), and
+  static-smoke (existence + stays-tiny checks). Regenerate only if the Pages URL
+  ever changes.
+- **Night Flight navigation, mobile vs laptop.** Decision: don't pick a winner —
+  add tap/click-to-fly as the shared direct-manipulation path. Tapping/clicking any
+  map tile flies the owl there step-by-step (150ms cadence, rows-then-columns like
+  the drawn trails) with a dashed gold target marker; any arrow key, WASD, or d-pad
+  press cancels the flight and hands control back. Reduced-motion users jump
+  straight to the target. The intro dialog names the device's controls via
+  `(pointer: coarse)`: touch hears "tap anywhere on the map", keyboard machines
+  hear "arrow keys or WASD — or click the map." The d-pad stays on all devices as
+  fallback and game chrome.
+- `docs/roadmap.md` added (pre-summit shakedown, day-of now/next idea, archive
+  mode, parked ideas gated on the source boundary); linked from the README.
+
+Verified July 17 with Playwright/Chromium at 390×844 and 1280×800: QR visible in
+footer and decodes to the live URL from an on-page screenshot; tap-to-fly lands the
+owl on the tapped tile and the dialog updates; a keypress mid-flight cancels it;
+storage stays byte-identical; `npm test` and `npm run build` green.
+
 ## What remains
 
 1. Review the local result and commit/push only after explicit approval.

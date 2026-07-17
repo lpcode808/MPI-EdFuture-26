@@ -15,6 +15,7 @@ const runtimeFiles = [
   "data/event.js",
   "data/schedule.js",
   "assets/brand/edfuturesummit-banner.webp",
+  "assets/brand/qr-guide.svg",
   "assets/fonts/press-start-2p-latin.woff2",
   "assets/fonts/press-start-2p-latin-ext.woff2",
   "assets/icons/favicon.svg",

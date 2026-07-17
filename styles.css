@@ -748,6 +748,35 @@ footer {
 
 footer p { max-width: 42rem; margin: 0; opacity: 0.82; }
 
+.pass-it-on {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* The SVG carries its own quiet zone; the white card adds contrast headroom
+   so the code scans reliably off dim or glary screens. */
+.qr-code {
+  flex: 0 0 auto;
+  width: 118px;
+  height: 118px;
+  padding: 6px;
+  border-radius: var(--radius-small);
+  background: #ffffff;
+}
+
+.pass-copy { display: grid; gap: 0.45rem; justify-items: start; }
+
+.pass-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  opacity: 1;
+}
+
 .footer-copy { display: grid; gap: 0.4rem; }
 
 .credit a {

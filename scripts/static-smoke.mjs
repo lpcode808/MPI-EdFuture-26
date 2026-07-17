@@ -66,6 +66,8 @@ assert(manifest.display === "standalone", "Manifest must use standalone display 
 assert(manifest.start_url === "./#agenda", "Manifest start_url should open the program.");
 assert(manifest.icons.some((icon) => icon.purpose.split(/\s+/).includes("maskable")), "Manifest needs a maskable icon.");
 assert(existsSync(resolve(root, "assets/brand/edfuturesummit-banner.webp")), "Official banner asset is missing.");
+assert(existsSync(resolve(root, "assets/brand/qr-guide.svg")), "Share QR asset is missing.");
+assert(readFileSync(resolve(root, "assets/brand/qr-guide.svg"), "utf8").length < 10000, "QR asset should stay a tiny static SVG.");
 assert(existsSync(resolve(root, "scraped/day-1-program.png")), "Day 1 source image is missing.");
 assert(existsSync(resolve(root, "scraped/day-2-program.png")), "Day 2 source image is missing.");
 
