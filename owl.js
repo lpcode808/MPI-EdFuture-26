@@ -31,14 +31,14 @@ const OWL_SPRITE = [
 ];
 
 const BOOK_SPRITE = [
-  ".DDDDDDDD.",
-  "DPPPPPPPPD",
-  "DPWWWWWWPD",
-  "DPWLLLLWPD",
-  "DPWWWWWWPD",
-  "DPWLLLWWPD",
-  "DPPPPPPPPD",
-  ".DDDDDDDD."
+  ".DDDDDDDDD.",
+  "DWWWWPWWWWD",
+  "DWLLWPWLLWD",
+  "DWWWWPWWWWD",
+  "DWLLWPWLLWD",
+  "DWWWWPWWWWD",
+  "DPPPPPPPPPD",
+  ".DDDDDDDDD."
 ];
 
 const TREE_SPRITE = [
@@ -109,13 +109,6 @@ let overlay = null;
 export function openOwlMode(store) {
   if (overlay) return;
 
-  if (!document.getElementById("owl-font")) {
-    const link = document.createElement("link");
-    link.id = "owl-font";
-    link.rel = "stylesheet";
-    link.href = "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap";
-    document.head.append(link);
-  }
   injectStyles();
 
   const state = store.get();
@@ -140,6 +133,7 @@ export function openOwlMode(store) {
     </header>
     <div class="owl-viewport">
       <div class="owl-world" style="width:${worldWidth}px;height:${worldHeight}px"></div>
+      <div class="owl-compass" hidden><span class="owl-compass-arrow" aria-hidden="true">➤</span><span>NOTE</span></div>
     </div>
     <div class="owl-bottom">
       <div class="owl-dialog" aria-live="polite"></div>
@@ -154,6 +148,7 @@ export function openOwlMode(store) {
   const world = overlay.querySelector(".owl-world");
   const viewport = overlay.querySelector(".owl-viewport");
   const dialog = overlay.querySelector(".owl-dialog");
+  const compass = overlay.querySelector(".owl-compass");
 
   pathCells.forEach((key) => {
     const [c, r] = key.split(",").map(Number);
@@ -212,7 +207,9 @@ export function openOwlMode(store) {
     if (!node) {
       const hint = document.createElement("p");
       hint.className = "owl-line";
-      hint.textContent = `HOOT! ${notedCount} of ${nodes.length} pages carry your notes. Glowing pages have one — fly onto a page to read it.`;
+      hint.textContent = notedCount
+        ? `HOOT! ${notedCount} of ${nodes.length} pages hold your notes. Follow the gold arrow and land on a glowing page to read one.`
+        : `HOOT! No notes on these pages yet — notes you write in the guide appear here. Explore!`;
       dialog.append(hint);
       return;
     }
@@ -237,19 +234,56 @@ export function openOwlMode(store) {
     dialog.append(note);
   }
 
+  const camera = { x: 0, y: 0 };
+
   function updateCamera() {
     const axis = (view, span, focus) => (span <= view
       ? (view - span) / 2
       : -Math.min(Math.max(focus - view / 2, 0), span - view));
-    const x = axis(viewport.clientWidth, worldWidth, position.c * CELL + CELL / 2);
-    const y = axis(viewport.clientHeight, worldHeight, position.r * CELL + CELL / 2);
-    world.style.transform = `translate(${x}px, ${y}px)`;
+    camera.x = axis(viewport.clientWidth, worldWidth, position.c * CELL + CELL / 2);
+    camera.y = axis(viewport.clientHeight, worldHeight, position.r * CELL + CELL / 2);
+    world.style.transform = `translate(${camera.x}px, ${camera.y}px)`;
+  }
+
+  const notedNodes = nodes.filter((node) => (notes[node.session.id] || "").trim());
+
+  // Edge compass: when every noted page is off-camera, point at the nearest one.
+  function updateCompass() {
+    if (!notedNodes.length) {
+      compass.hidden = true;
+      return;
+    }
+    let best = notedNodes[0];
+    let bestDistance = Infinity;
+    notedNodes.forEach((node) => {
+      const distance = Math.abs(node.c - position.c) + Math.abs(node.r - position.r);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = node;
+      }
+    });
+    const targetX = camera.x + best.c * CELL + CELL / 2;
+    const targetY = camera.y + best.r * CELL + CELL / 2;
+    const view = { w: viewport.clientWidth, h: viewport.clientHeight };
+    // A tile straddling the edge is as good as invisible — keep the arrow up
+    // until at least half a cell of it is inside the camera.
+    const margin = CELL / 2;
+    compass.hidden = targetX > margin && targetX < view.w - margin && targetY > margin && targetY < view.h - margin;
+    if (compass.hidden) return;
+    const pad = 34;
+    const x = Math.min(Math.max(targetX, pad), view.w - pad);
+    const y = Math.min(Math.max(targetY, pad), view.h - pad);
+    compass.style.left = `${x}px`;
+    compass.style.top = `${y}px`;
+    const angle = Math.atan2(targetY - y, targetX - x) * 180 / Math.PI;
+    compass.querySelector(".owl-compass-arrow").style.transform = `rotate(${angle}deg)`;
   }
 
   function place() {
     owl.style.transform = `translate(${position.c * CELL}px, ${position.r * CELL}px)`;
     owl.querySelector(".owl-body").style.transform = facingLeft ? "scaleX(-1)" : "";
     updateCamera();
+    updateCompass();
     updateDialog();
   }
 
@@ -304,7 +338,7 @@ export function openOwlMode(store) {
   function close() {
     clearInterval(holdTimer);
     window.removeEventListener("keydown", onKeydown, true);
-    window.removeEventListener("resize", updateCamera);
+    window.removeEventListener("resize", place);
     overlay.remove();
     overlay = null;
     document.body.style.overflow = previousOverflow;
@@ -313,7 +347,7 @@ export function openOwlMode(store) {
 
   overlay.querySelector(".owl-close").addEventListener("click", close);
   window.addEventListener("keydown", onKeydown, true);
-  window.addEventListener("resize", updateCamera);
+  window.addEventListener("resize", place);
 
   document.body.style.overflow = "hidden";
   document.body.append(overlay);
@@ -326,6 +360,23 @@ function injectStyles() {
   const style = document.createElement("style");
   style.id = "owl-style";
   style.textContent = `
+/* Self-hosted so the retro face survives offline / summit wifi (OFL license). */
+@font-face {
+  font-family: "Press Start 2P";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/press-start-2p-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+2018-201A, U+201C-201E, U+2022, U+2026;
+}
+@font-face {
+  font-family: "Press Start 2P";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/press-start-2p-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BB, U+1E00-1EFF;
+}
 .owl-overlay {
   position: fixed;
   inset: 0;
@@ -388,6 +439,21 @@ function injectStyles() {
   box-shadow: inset 0 0 0 2px #182a22, inset 0 -4px 0 #1b2e25;
 }
 .owl-node.has-note svg { filter: drop-shadow(0 0 7px rgba(224, 162, 60, 0.9)); }
+.owl-compass {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transform: translate(-50%, -50%);
+  color: #ffd98a;
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  animation: owl-glow 1.6s ease-in-out infinite;
+}
+.owl-compass-arrow { display: inline-block; font-size: 0.75rem; }
 .owl-node.has-note { animation: owl-glow 1.6s ease-in-out infinite; }
 .owl-node.is-saved::after {
   content: "★";
@@ -413,7 +479,8 @@ function injectStyles() {
   transform-origin: top left;
   scale: 0.9;
 }
-.owl-sprite { z-index: 3; transition: transform 160ms ease; pointer-events: none; }
+/* steps() keeps the hop feeling 16-bit instead of gliding. */
+.owl-sprite { z-index: 3; transition: transform 160ms steps(3, end); pointer-events: none; }
 .owl-sprite::after {
   content: "";
   position: absolute;

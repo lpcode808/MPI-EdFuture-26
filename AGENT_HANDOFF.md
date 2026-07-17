@@ -99,6 +99,24 @@ A second-agent review verified all 29 program items against the two source flyer
 - Plumbing: `owl.js` added to the sw shell (cache bumped to `v4`), the build allowlist (dist is now 12 files), and `npm run check`.
 - Verified July 16: `npm test` + `npm run build` pass; Playwright against installed Chrome at 390px and 1280px — no console errors, `clientWidth === scrollWidth === 390`, both easter-egg triggers work, dialog surfaces a seeded note, Escape close leaves localStorage byte-identical.
 
+## July 16 easter-egg persona review (Opus grader → Fable edits)
+
+A fresh-context persona evaluation ("SNES-kid teacher on summit wifi") graded Night Flight
+"ship after paper-cuts." Applied:
+
+- **Self-hosted Press Start 2P** (`assets/fonts/*.woff2`, OFL) via `@font-face` in owl.js —
+  the retro face now survives offline; verified with all external requests blocked. Added to
+  sw shell (cache `v5`) and the build allowlist (dist = 14 files).
+- **Note compass**: when every noted page is off-camera, a gold rotating "➤ NOTE" arrow at the
+  viewport edge points to the nearest one (fixes the blind 12-tap hunt on phones). Tiles within
+  half a cell of the edge count as off-screen.
+- **Book sprite** redrawn as an open book (two pages + teal spine) — no longer reads as a floppy disk.
+- **Owl movement** uses `steps(3)` easing for a 16-bit hop instead of a modern glide.
+
+Deliberately skipped: typewriter text reveal (a busy attendee re-reading her own note wants it
+instantly) and narrowing which kinds get map tiles (the main UI allows notes on any non-break
+item; the map mirrors that). Both are on record as intentional.
+
 ## What remains
 
 1. Review the local result and commit/push only after explicit approval.
