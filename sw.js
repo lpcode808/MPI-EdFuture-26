@@ -1,4 +1,4 @@
-const CACHE_NAME = "mpi-edfuture-26-v5";
+const CACHE_NAME = "mpi-edfuture-26-v6";
 const SHELL = [
   "./",
   "./index.html",
@@ -10,6 +10,7 @@ const SHELL = [
   "./data/schedule.js",
   "./manifest.webmanifest",
   "./assets/brand/edfuturesummit-banner.webp",
+  "./assets/brand/qr-guide.svg",
   "./assets/fonts/press-start-2p-latin.woff2",
   "./assets/fonts/press-start-2p-latin-ext.woff2",
   "./assets/icons/favicon.svg",

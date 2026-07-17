@@ -14,7 +14,7 @@ This is an unofficial, mobile-first companion for the Third Annual Mid-Pacific E
 - Save a private personal plan
 - Add per-session and quick notes, stored only in your browser
 - Export a JSON backup of your plan and import it on another device
-- Share the guide link
+- Share the guide link, or let someone scan the QR code in the footer
 - Install it as an offline-capable app
 - Navigate fully by keyboard, with visible focus, 44px touch targets, and reduced-motion support
 
@@ -31,7 +31,7 @@ Names appear only when printed in those public program images. The project conta
 
 The sources do not publish session end times or descriptions, so the app shows only the published start times. Humanitix also conflicts about event end times and ticket status; those conflicts are recorded in `scraped/humanitix-public-facts.json` and are not silently resolved.
 
-See `docs/privacy-and-sources.md` for the full boundary.
+See `docs/privacy-and-sources.md` for the full boundary, and `docs/roadmap.md` for what's planned next.
 
 ## Run locally
 
@@ -69,7 +69,7 @@ scripts/validate-data.mjs      provenance and no-invention checks
 scripts/storage-roundtrip.mjs  backup-state normalization regression
 scripts/static-smoke.mjs       shell, accessibility, and PWA checks
 scripts/build-pages.mjs        allowlisted static release to dist/
-docs/                          architecture and privacy notes
+docs/                          architecture, privacy, and roadmap notes
 AGENT_HANDOFF.md               continuation state for future agents
 ```
 

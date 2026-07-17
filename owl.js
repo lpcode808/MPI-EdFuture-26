@@ -205,6 +205,13 @@ export function openOwlMode(store) {
   // region from announcing every empty step to screen readers.
   let dialogKey = null;
 
+  // Name the controls the device actually has: touch gets tap-to-fly,
+  // keyboard machines get arrows/WASD. Both work everywhere regardless.
+  const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+  const controlsHint = coarsePointer
+    ? "Tap anywhere on the map to fly there."
+    : "Fly with the arrow keys or WASD — or click the map.";
+
   function updateDialog() {
     const node = nodeAt(position.c, position.r);
     const key = node ? node.session.id : "hint";
@@ -215,8 +222,8 @@ export function openOwlMode(store) {
       const hint = document.createElement("p");
       hint.className = "owl-line";
       hint.textContent = notedCount
-        ? `HOOT! Each book below is a program item — ${notedCount} of ${nodes.length} hold your notes. Follow the gold arrow to a glowing page and land on it to read.`
-        : `HOOT! This is the summit program as a night overworld — every book is a program item. Land on one to peek, and notes you write in the guide will glow here.`;
+        ? `HOOT! Each book below is a program item — ${notedCount} of ${nodes.length} hold your notes. ${controlsHint} Glowing pages hold your words.`
+        : `HOOT! This is the summit program as a night overworld — every book is a program item. ${controlsHint} Notes you write in the guide will glow here.`;
       dialog.append(hint);
       return;
     }
@@ -294,13 +301,62 @@ export function openOwlMode(store) {
     updateDialog();
   }
 
-  function move(dx, dy) {
+  function step(dx, dy) {
     if (dx < 0) facingLeft = true;
     if (dx > 0) facingLeft = false;
     position.c = Math.min(Math.max(position.c + dx, 0), COLS - 1);
     position.r = Math.min(Math.max(position.r + dy, 0), rowCount - 1);
     place();
   }
+
+  // Tap/click-to-fly: the owl walks the same rows-then-columns route the
+  // trails were drawn with. Any manual input hands control straight back.
+  let flightTimer = 0;
+  const target = document.createElement("div");
+  target.className = "owl-target";
+  target.hidden = true;
+  world.append(target);
+
+  function cancelFlight() {
+    clearInterval(flightTimer);
+    flightTimer = 0;
+    target.hidden = true;
+  }
+
+  function move(dx, dy) {
+    cancelFlight();
+    step(dx, dy);
+  }
+
+  function flyTo(c, r) {
+    cancelFlight();
+    if (c === position.c && r === position.r) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (c < position.c) facingLeft = true;
+      if (c > position.c) facingLeft = false;
+      position.c = c;
+      position.r = r;
+      place();
+      return;
+    }
+    target.style.transform = `translate(${c * CELL}px, ${r * CELL}px)`;
+    target.hidden = false;
+    flightTimer = setInterval(() => {
+      const dr = Math.sign(r - position.r);
+      if (dr) { step(0, dr); return; }
+      const dc = Math.sign(c - position.c);
+      if (dc) { step(dc, 0); return; }
+      cancelFlight();
+    }, 150);
+  }
+
+  viewport.addEventListener("click", (event) => {
+    const rect = world.getBoundingClientRect();
+    const c = Math.floor((event.clientX - rect.left) / CELL);
+    const r = Math.floor((event.clientY - rect.top) / CELL);
+    if (c < 0 || c >= COLS || r < 0 || r >= rowCount) return;
+    flyTo(c, r);
+  });
 
   const KEY_MOVES = {
     ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0],
@@ -360,6 +416,7 @@ export function openOwlMode(store) {
   const inertTargets = [...document.body.children].filter((el) => el !== overlay && el.tagName !== "SCRIPT");
 
   function close() {
+    cancelFlight();
     clearInterval(holdTimer);
     window.removeEventListener("keydown", onKeydown, true);
     window.removeEventListener("resize", place);
@@ -453,7 +510,7 @@ function injectStyles() {
   background-size: ${CELL * 2}px ${CELL * 2}px;
   transition: transform 180ms ease;
 }
-.owl-path, .owl-node, .owl-decor, .owl-sign, .owl-sprite {
+.owl-path, .owl-node, .owl-decor, .owl-sign, .owl-sprite, .owl-target {
   position: absolute;
   top: 0;
   left: 0;
@@ -461,6 +518,13 @@ function injectStyles() {
   height: ${CELL}px;
   display: grid;
   place-items: center;
+}
+.owl-target {
+  z-index: 2;
+  border: 3px dashed #ffd98a;
+  border-radius: 8px;
+  pointer-events: none;
+  animation: owl-glow 0.8s steps(2) infinite;
 }
 .owl-path {
   background: #21362c;
