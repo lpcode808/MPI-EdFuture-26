@@ -12,6 +12,9 @@ const quickNotes = document.querySelector("#quickNotes");
 const dayFilters = document.querySelector("#dayFilters");
 const template = document.querySelector("#sessionTemplate");
 let activeDay = "all";
+// Which sessions have their note editor open. Lives outside the render cycle
+// so a search keystroke or bookmark toggle doesn't silently fold editors shut.
+const openNoteIds = new Set();
 
 function matchesSearch(session, query) {
   if (!query) return true;
@@ -52,8 +55,13 @@ function sessionCard(session) {
     const container = node.closest("#savedList") ? savedList : agendaList;
     store.toggleSaved(session.id);
     renderAll();
+    // The agenda fallback only works while its panel is visible; a hidden
+    // panel's buttons refuse focus and keyboard users get dumped to <body>.
+    const agendaVisible = !agendaList.closest(".panel").hidden;
     const replacement = container.querySelector(`[data-session-id="${session.id}"] .save-button`)
-      || agendaList.querySelector(`[data-session-id="${session.id}"] .save-button`);
+      || (agendaVisible && agendaList.querySelector(`[data-session-id="${session.id}"] .save-button`))
+      || container.querySelector(".save-button")
+      || document.querySelector("#tab-saved");
     replacement?.focus();
   });
 
@@ -61,8 +69,12 @@ function sessionCard(session) {
   const noteField = node.querySelector(".session-notes");
   const textarea = noteField.querySelector("textarea");
   textarea.value = state.sessionNotes[session.id] || "";
+  noteField.hidden = !openNoteIds.has(session.id);
+  noteButton.setAttribute("aria-expanded", String(!noteField.hidden));
   noteButton.querySelector("span").textContent = `Add a private note for ${session.title}`;
   noteButton.addEventListener("click", () => {
+    if (noteField.hidden) openNoteIds.add(session.id);
+    else openNoteIds.delete(session.id);
     noteField.hidden = !noteField.hidden;
     noteButton.setAttribute("aria-expanded", String(!noteField.hidden));
     if (!noteField.hidden) textarea.focus();
@@ -120,7 +132,9 @@ function renderSaved() {
       savedList.append(section);
     });
   }
-  quickNotes.value = state.quickNotes;
+  // Assigning .value unconditionally would collapse the caret to the end on
+  // every unrelated re-render (e.g. bookmarking while a note is mid-edit).
+  if (quickNotes.value !== state.quickNotes) quickNotes.value = state.quickNotes;
 }
 
 function renderAll() {
@@ -197,14 +211,17 @@ document.querySelector("#importInput").addEventListener("change", async (event) 
 
 document.querySelector("#shareButton").addEventListener("click", async () => {
   const data = { title: EVENT.name, text: "2026 EdFuture Summit pocket program", url: EVENT.appUrl };
+  const shareButton = document.querySelector("#shareButton");
   if (navigator.share) {
     try { await navigator.share(data); } catch { /* User dismissed share. */ }
   } else {
     try {
       await navigator.clipboard.writeText(EVENT.appUrl);
-      document.querySelector("#shareButton").textContent = "Guide link copied";
+      shareButton.textContent = "Guide link copied";
+      setTimeout(() => { shareButton.textContent = "Share this guide"; }, 4000);
     } catch {
-      document.querySelector("#shareButton").textContent = EVENT.appUrl;
+      // Clipboard was denied: leave the raw URL visible so it can be copied by hand.
+      shareButton.textContent = EVENT.appUrl;
     }
   }
 });
@@ -220,10 +237,13 @@ function summonOwl() {
 
 let owlTaps = 0;
 let owlTapTimer = 0;
-document.querySelector(".brand").addEventListener("click", () => {
+document.querySelector(".brand").addEventListener("click", (event) => {
   owlTaps += 1;
   clearTimeout(owlTapTimer);
   owlTapTimer = setTimeout(() => { owlTaps = 0; }, 1500);
+  // The first tap behaves as the normal home link; once a streak is going,
+  // swallow navigation so rapid taps don't thrash tab and scroll state.
+  if (owlTaps > 1) event.preventDefault();
   if (owlTaps >= 5) {
     owlTaps = 0;
     summonOwl();
