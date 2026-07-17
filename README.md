@@ -1,21 +1,24 @@
 # 2026 EdFuture Summit pocket program
 
-An unofficial, mobile-first guide for the Mid-Pacific EdFuture Summit on July 21–22, 2026, at Mid-Pacific Institute in Honolulu.
+**Open the guide → <https://lpcode808.github.io/MPI-EdFuture-26/>**
 
-The app follows the modular, dependency-free architecture of `HIDOE-AI-26-app` and carries forward useful attendee patterns from the PCATT and KSEDTECH guides without copying their event content. Its visual system comes from the public EdFuture banner and program flyers: deep evergreen, muted sage, pale aqua, and white.
+It works on any phone or laptop browser — no install, no account. Add it to your home screen and it keeps working offline, which helps on summit wifi.
 
-## What works
+This is an unofficial, mobile-first companion for the Third Annual Mid-Pacific EdFuture Summit, July 21–22, 2026, at Mid-Pacific Institute in Honolulu. Browse the two-day program, build a personal plan, and keep private notes — everything stays on your own device.
 
-- Browse all 29 published program items across two days
+## What you can do with it
+
+- Browse all 29 published program items across the two days
 - Search by title, printed presenter, room, or program type
 - Filter to either day
 - Save a private personal plan
-- Add per-session and quick notes stored only in the current browser
-- Export and validate a JSON backup
+- Add per-session and quick notes, stored only in your browser
+- Export a JSON backup of your plan and import it on another device
 - Share the guide link
-- Install the offline-capable app shell
-- Navigate tabs with Arrow, Home, and End keys
-- Use the guide with visible focus, 44px controls, reduced motion, and narrow mobile layouts
+- Install it as an offline-capable app
+- Navigate fully by keyboard, with visible focus, 44px touch targets, and reduced-motion support
+
+Night owls who look closely may find one more thing. 🦉
 
 ## Source and privacy boundary
 
@@ -36,7 +39,7 @@ See `docs/privacy-and-sources.md` for the full boundary.
 npm run serve
 ```
 
-Open <http://127.0.0.1:4173/>. No package installation is required.
+Open <http://127.0.0.1:4173/>. No package installation is required — the app has zero runtime dependencies.
 
 ## Verify and build
 
@@ -55,6 +58,7 @@ npm run build
 index.html                     semantic app shell
 styles.css                     brand-derived responsive visual system
 app.js                         tabs, search, filters, saved plan, notes, sharing
+owl.js                         a small surprise, loaded only if summoned
 storage.js                     versioned local persistence and normalization
 data/event.js                  public event facts and source status
 data/schedule.js               screenshot-transcribed program data
@@ -67,13 +71,14 @@ docs/                          architecture and privacy notes
 AGENT_HANDOFF.md               continuation state for future agents
 ```
 
+The app follows the modular, dependency-free architecture of `HIDOE-AI-26-app` and carries forward attendee patterns from the PCATT and KSEDTECH guides without copying their event content. Its visual system comes from the public EdFuture banner and program flyers: deep evergreen, muted sage, pale aqua, and warm paper.
+
 ## Deployment
 
-The intended repository is <https://github.com/lpcode808/MPI-EdFuture-26> and the intended Pages URL is <https://lpcode808.github.io/MPI-EdFuture-26/>.
+The repository is <https://github.com/lpcode808/MPI-EdFuture-26> and the live guide is <https://lpcode808.github.io/MPI-EdFuture-26/>.
 
-Pushes to `main` run a SHA-pinned GitHub Pages workflow that publishes only `dist/`. This workspace does not commit or push changes without explicit approval.
+Pushes to `main` run a SHA-pinned GitHub Pages workflow that publishes only `dist/`.
 
 ## Rights
 
 No open-source license is granted by this repository. Event copy and artwork remain attributable to their source owners; source URLs and capture provenance are retained in the project.
-
