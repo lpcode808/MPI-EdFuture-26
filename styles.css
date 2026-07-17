@@ -786,6 +786,19 @@ footer p { max-width: 42rem; margin: 0; opacity: 0.82; }
   text-underline-offset: 0.2em;
 }
 
+.behind-scenes a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  min-height: 44px;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.behind-scenes a:hover { color: white; }
+
 footer button {
   min-height: 44px;
   padding: 0.55rem 0;

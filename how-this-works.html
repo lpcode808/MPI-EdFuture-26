@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0c1513">
+    <meta name="description" content="Behind the scenes of the EdFuture 2026 pocket program — how a dependency-free static web app renders, remembers, and works offline.">
+    <meta name="robots" content="noindex">
+    <title>How this guide works · EdFuture 2026</title>
+    <link rel="icon" href="./assets/icons/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --paper: #0c1513;
+        --surface: #121e1a;
+        --surface-deep: #0a1210;
+        --ink: #e6f0ec;
+        --ink-muted: #a9c0b9;
+        --line: #274139;
+        --teal: #6ec6b2;
+        --sage: #5d867f;
+        --gold: #dcb469;
+        --footer: #07352c;
+        --ui: "Sora", "Avenir Next", sans-serif;
+        --reading: "Source Serif 4", Georgia, serif;
+        --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      * { box-sizing: border-box; }
+      html { color-scheme: dark; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--reading);
+        font-size: 1.05rem;
+        line-height: 1.65;
+        background-image:
+          linear-gradient(to right, rgba(110, 198, 178, 0.045) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(110, 198, 178, 0.045) 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+
+      .wrap {
+        max-width: 50rem;
+        margin: 0 auto;
+        padding: 3rem 1.25rem 6rem;
+        padding-left: max(1.25rem, env(safe-area-inset-left));
+        padding-right: max(1.25rem, env(safe-area-inset-right));
+      }
+
+      a { color: var(--teal); text-underline-offset: 2px; }
+      a:hover { color: var(--ink); }
+      a:focus-visible, button:focus-visible {
+        outline: 2px solid var(--teal);
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
+
+      .back-link {
+        display: inline-block;
+        font-family: var(--ui);
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: var(--ink-muted);
+        border: 1px solid var(--line);
+        padding: 0.55rem 0.85rem;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-radius: 0.45rem;
+        background: var(--surface);
+      }
+      .back-link:hover { color: var(--ink); border-color: var(--sage); }
+
+      .title-block {
+        border: 1.5px solid var(--line);
+        background: var(--surface);
+        border-radius: 0.85rem;
+        overflow: hidden;
+        margin-bottom: 3rem;
+      }
+      .title-block .tb-main {
+        padding: 1.75rem 1.4rem;
+        border-bottom: 1px solid var(--line);
+      }
+      .title-block h1 {
+        font-family: var(--ui);
+        font-weight: 700;
+        font-size: clamp(1.6rem, 5vw, 2.1rem);
+        letter-spacing: -0.02em;
+        margin: 0 0 0.6rem;
+        color: var(--ink);
+      }
+      .title-block h1 em { color: var(--teal); font-style: normal; }
+      .title-block .tb-main p {
+        margin: 0;
+        color: var(--ink-muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+      .tb-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border-bottom: 1px solid var(--line);
+      }
+      .tb-row:last-child { border-bottom: 0; }
+      .tb-cell {
+        padding: 0.8rem 1rem;
+        border-right: 1px solid var(--line);
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+      .tb-cell:last-child { border-right: 0; }
+      .tb-cell .label { color: var(--sage); font-size: 0.62rem; margin-bottom: 0.25rem; }
+      .tb-cell .value { color: var(--ink); font-weight: 500; }
+
+      h2 {
+        font-family: var(--ui);
+        font-weight: 600;
+        font-size: 1.3rem;
+        letter-spacing: -0.01em;
+        margin: 3.25rem 0 0.9rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1.5px solid var(--line);
+        display: flex;
+        align-items: baseline;
+        gap: 0.75rem;
+        color: var(--ink);
+      }
+      h2 .num {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--teal);
+        font-weight: 400;
+        letter-spacing: 0.1em;
+      }
+      h3 {
+        font-family: var(--ui);
+        font-weight: 600;
+        font-size: 1.02rem;
+        margin: 1.9rem 0 0.6rem;
+        color: var(--teal);
+      }
+      p { margin: 0 0 1rem; }
+      ul, ol { margin: 0 0 1rem; padding-left: 1.4rem; }
+      li { margin-bottom: 0.4rem; }
+      strong { color: var(--gold); font-weight: 600; }
+
+      code {
+        font-family: var(--mono);
+        font-size: 0.85em;
+        background: rgba(110, 198, 178, 0.1);
+        color: var(--teal);
+        padding: 0.1em 0.4em;
+        border-radius: 3px;
+      }
+
+      pre {
+        background: var(--surface-deep);
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--teal);
+        color: var(--ink);
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        line-height: 1.6;
+        padding: 1rem 1.15rem;
+        margin: 0 0 1.4rem;
+        overflow-x: auto;
+        border-radius: 0 0.45rem 0.45rem 0;
+      }
+      pre code { background: transparent; color: inherit; padding: 0; font-size: inherit; }
+      pre .c { color: var(--sage); font-style: italic; }
+      pre .k { color: var(--teal); }
+      pre .s { color: var(--gold); }
+
+      .callout {
+        border: 1px solid var(--sage);
+        background: rgba(93, 134, 127, 0.12);
+        padding: 1rem 1.15rem;
+        margin: 1.25rem 0 1.5rem;
+        font-size: 0.92rem;
+        border-radius: 0.45rem;
+      }
+      .callout .tag {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--teal);
+        background: var(--paper);
+        padding: 0.15rem 0.5rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid var(--teal);
+        border-radius: 3px;
+      }
+      .callout.warn { border-color: var(--gold); background: rgba(220, 180, 105, 0.08); }
+      .callout.warn .tag { color: var(--gold); border-color: var(--gold); }
+
+      .tree {
+        background: var(--surface-deep);
+        border: 1px solid var(--line);
+        font-family: var(--mono);
+        font-size: 0.76rem;
+        padding: 1rem 1.25rem;
+        margin: 0 0 1.4rem;
+        overflow-x: auto;
+        line-height: 1.75;
+        white-space: pre;
+        border-radius: 0.45rem;
+        color: var(--ink-muted);
+      }
+      .tree .star { color: var(--gold); font-weight: 500; }
+      .tree .comment { color: var(--sage); }
+      .tree .file { color: var(--ink); }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+        gap: 0.6rem;
+        margin: 1.4rem 0;
+        font-family: var(--mono);
+        font-size: 0.68rem;
+      }
+      .flow .step {
+        border: 1px solid var(--line);
+        padding: 0.75rem 0.6rem;
+        background: var(--surface);
+        text-align: center;
+        letter-spacing: 0.03em;
+        border-radius: 0.45rem;
+        color: var(--ink);
+      }
+      .flow .step .num {
+        display: block;
+        color: var(--teal);
+        font-size: 0.6rem;
+        margin-bottom: 0.3rem;
+      }
+
+      .compare {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.9rem;
+        margin: 1.4rem 0;
+      }
+      .compare .col {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        padding: 1rem;
+        border-radius: 0.45rem;
+      }
+      .compare .col h4 {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--gold);
+        margin: 0 0 0.6rem;
+      }
+      .compare .col p { font-size: 0.88rem; margin: 0; }
+      .compare .col p + p { margin-top: 0.5rem; color: var(--ink-muted); }
+
+      footer.foot {
+        margin-top: 5rem;
+        padding-top: 1.4rem;
+        border-top: 1.5px solid var(--line);
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        color: var(--sage);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      footer.foot a { color: var(--sage); }
+      footer.foot a:hover { color: var(--teal); }
+
+      @media (max-width: 40rem) {
+        .compare { grid-template-columns: 1fr; }
+        h2 { font-size: 1.15rem; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+      }
+      @media print {
+        body { background: #fff; color: #111; background-image: none; }
+        pre, .tree { page-break-inside: avoid; }
+        @page { margin: 0.9in; size: letter; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <a class="back-link" href="./index.html">← Back to the pocket program</a>
+
+      <div class="title-block">
+        <div class="tb-main">
+          <h1>How this guide <em>works</em></h1>
+          <p>A behind-the-scenes tour of the EdFuture 2026 pocket program — how a small pile of plain files becomes an app that renders a schedule, remembers your plan, and keeps working offline. Written for the technically curious; every term of art gets a plain-language gloss.</p>
+        </div>
+        <div class="tb-row">
+          <div class="tb-cell"><div class="label">Subject</div><div class="value">MPI-EdFuture-26</div></div>
+          <div class="tb-cell"><div class="label">Audience</div><div class="value">Curious builders</div></div>
+        </div>
+        <div class="tb-row">
+          <div class="tb-cell"><div class="label">Reading time</div><div class="value">~12 min</div></div>
+          <div class="tb-cell"><div class="label">Dependencies</div><div class="value">Zero</div></div>
+        </div>
+      </div>
+
+      <h2><span class="num">01</span> What is this site?</h2>
+
+      <p>It's an <strong>unofficial pocket program</strong> for the 2026 EdFuture Summit at Mid-Pacific Institute. One page, three tabs: browse the two-day <strong>Program</strong>, collect sessions into <strong>My plan</strong>, and check <strong>Info</strong>. You can search, filter by day, bookmark sessions, and attach private notes.</p>
+
+      <p>The defining constraint: everything you save stays <em>on your device</em>. There is no account, no login, no analytics, and no server that ever sees your plan. That isn't a limitation that snuck in — it's the design.</p>
+
+      <div class="callout">
+        <span class="tag">Mental model</span>
+        Think of it as a <strong>paper program with a pencil attached</strong>. The printed part (the schedule) is the same for everyone and comes from the event's published flyers. The pencil marks (your bookmarks and notes) exist only on your copy. Nobody collects the pencils.
+      </div>
+
+      <h2><span class="num">02</span> The big picture: static files, zero dependencies</h2>
+
+      <p>The whole app is <strong>plain HTML, CSS, and JavaScript</strong> — no framework, no build tool that transforms code, no <code>node_modules</code> folder. "Zero runtime dependencies" means the only software the app relies on is the browser you're already holding.</p>
+
+      <div class="compare">
+        <div class="col">
+          <h4>A typical conference app</h4>
+          <p>Native app store download, or a React site talking to a backend. Accounts, push notifications, analytics.</p>
+          <p>Needs servers, maintenance, and your data.</p>
+        </div>
+        <div class="col">
+          <h4>This guide</h4>
+          <p>Sixteen files served from GitHub Pages. The browser downloads them once and can run them offline.</p>
+          <p>Needs nothing, knows nothing about you.</p>
+        </div>
+      </div>
+
+      <p>It is, however, a <strong>PWA</strong> — a progressive web app. That's a website with two extra powers: it can be installed to your home screen like a native app, and it can keep working without a network connection. Both powers come from small standard files, not from an app store.</p>
+
+      <h2><span class="num">03</span> The files</h2>
+
+      <p>Here's the project, starred where it matters. Note the split: the top group ships to attendees; the bottom group is workshop material that never leaves the repository.</p>
+
+      <div class="tree"><span class="file">MPI-EdFuture-26/</span>
+├── <span class="star">index.html</span>              <span class="comment">← the shell: header, three tab panels, footer</span>
+├── <span class="star">app.js</span>                  <span class="comment">← the brain: tabs, search, filters, plan, notes</span>
+├── <span class="star">storage.js</span>              <span class="comment">← how your plan is saved on-device</span>
+├── <span class="star">data/schedule.js</span>        <span class="comment">← all 29 program items, transcribed from flyers</span>
+├── data/event.js           <span class="comment">  event facts (dates, venue, official URL)</span>
+├── styles.css              <span class="comment">  the evergreen night-mode visual system</span>
+├── sw.js                   <span class="comment">  service worker — the offline machinery</span>
+├── manifest.webmanifest    <span class="comment">  "install me" metadata for phones</span>
+├── owl.js                  <span class="comment">  🦉 (see section 09)</span>
+├── how-this-works.html     <span class="comment">  you are here</span>
+├── assets/                 <span class="comment">  banner, icons, QR code, one pixel font</span>
+│
+│   <span class="comment">— never deployed —</span>
+├── <span class="star">scraped/</span>                <span class="comment">← source evidence: the two program flyers</span>
+├── scripts/                <span class="comment">  validators + the allowlisted build</span>
+├── docs/                   <span class="comment">  architecture, privacy, roadmap notes</span>
+└── AGENTS.md               <span class="comment">  the contract AI agents read before editing</span></div>
+
+      <p>Three things worth noticing:</p>
+      <ol>
+        <li><strong>Data is code here.</strong> The schedule isn't fetched from an API — it's a JavaScript file (<code>data/schedule.js</code>) exporting a frozen array of 29 session objects. Editing the program means editing that file and republishing.</li>
+        <li><strong>Every session carries provenance.</strong> Each item records which source flyer it came from. A validation script fails if a session claims information the sources never published.</li>
+        <li><strong>The <code>scraped/</code> folder is evidence, not content.</strong> It holds the two public program images the schedule was transcribed from, so anyone can audit the transcription — but it's excluded from what gets deployed.</li>
+      </ol>
+
+      <h2><span class="num">04</span> How the program gets on screen</h2>
+
+      <p>When the page loads, this happens:</p>
+
+      <div class="flow">
+        <div class="step"><span class="num">01</span>Browser loads index.html</div>
+        <div class="step"><span class="num">02</span>app.js imports the schedule</div>
+        <div class="step"><span class="num">03</span>A template is cloned per session</div>
+        <div class="step"><span class="num">04</span>Cards are grouped by day</div>
+        <div class="step"><span class="num">05</span>You search, filter, save</div>
+      </div>
+
+      <p><code>index.html</code> contains a <code>&lt;template&gt;</code> element — an inert chunk of HTML the browser parses but doesn't display. It's the blank session card: a time slot, a title, a room, a bookmark button, a hidden note field. For each of the 29 sessions, <code>app.js</code> clones the template, fills in the fields, and appends it to the list:</p>
+
+      <pre><code><span class="k">const</span> node = template.content.firstElementChild.cloneNode(<span class="k">true</span>);
+node.querySelector(<span class="s">".session-time"</span>).textContent = session.time;
+node.querySelector(<span class="s">"h3"</span>).textContent = session.title;
+<span class="c">// … room, presenters, bookmark state …</span></code></pre>
+
+      <p>Search and day filters don't talk to a server either. Typing in the search box just re-runs a filter over the in-memory array — checking your query against each session's title, room, type, and people — and re-renders the list. With 29 items, that's instant.</p>
+
+      <p>The three tabs are one page wearing three outfits. Clicking a tab hides two panels and shows one, and writes the choice into the URL after the <code>#</code> symbol (<code>#agenda</code>, <code>#saved</code>, <code>#info</code>) so a shared or reloaded link lands on the right tab. The tabs are real <code>role="tab"</code> controls with full arrow-key navigation — accessibility here is load-bearing, not decorative: 44px touch targets, visible focus rings, reduced-motion support, and status text that screen readers announce.</p>
+
+      <h2><span class="num">05</span> Where your plan lives</h2>
+
+      <p>Bookmark a session and it's saved via <code>localStorage</code> — a built-in browser feature that lets a site keep small amounts of text on your device. The entire personal state is one JSON blob under one key:</p>
+
+      <pre><code><span class="c">// key: mpi_edfuture_26_attendee_state_v1</span>
+{
+  <span class="s">"schemaVersion"</span>: 1,
+  <span class="s">"savedSessionIds"</span>: [<span class="s">"d1-vibe-coding"</span>, <span class="s">"d2-keynote"</span>],
+  <span class="s">"sessionNotes"</span>: { <span class="s">"d2-keynote"</span>: <span class="s">"ask about rubric design"</span> },
+  <span class="s">"quickNotes"</span>: <span class="s">"find the TechZone table at lunch"</span>
+}</code></pre>
+
+      <p><code>storage.js</code> wraps this with two disciplines. First, a <strong>schema version</strong> baked into the key, so a future redesign of the format can't misread old data. Second, a <strong>normalize step</strong>: anything read from storage — or imported from a backup file — is filtered down to exactly the expected shape. Unknown fields are dropped, wrong types discarded, duplicate IDs deduplicated. The app never trusts stored data just because it stored it.</p>
+
+      <p>That's also how <strong>Export / Import backup</strong> works. Export wraps your state in an envelope stamped with a format name and the event ID, and downloads it as a JSON file. Import checks both stamps before accepting anything — a backup from a different event, or a random JSON file, is politely refused.</p>
+
+      <div class="callout warn">
+        <span class="tag">Honest trade-off</span>
+        Device-local means <em>device-local</em>: your phone and your laptop each have their own plan, and clearing browser data erases it. The backup file is the escape hatch — export on one device, import on the other. That's the price of a guide that collects nothing.
+      </div>
+
+      <h2><span class="num">06</span> Working offline: the service worker</h2>
+
+      <p>Summit wifi is a shared resource under load. The guide plans for that with a <strong>service worker</strong> (<code>sw.js</code>) — a small script the browser installs alongside the page that can intercept network requests, like a desk clerk who checks the filing cabinet before calling the archive.</p>
+
+      <p>On first visit, the worker stores the whole app shell — HTML, CSS, JavaScript, schedule data, fonts, images — in a named cache. After that it follows a strategy called <strong>stale-while-revalidate</strong>:</p>
+
+      <div class="flow">
+        <div class="step"><span class="num">01</span>You request a file</div>
+        <div class="step"><span class="num">02</span>Cache answers instantly</div>
+        <div class="step"><span class="num">03</span>A fresh copy is fetched in the background</div>
+        <div class="step"><span class="num">04</span>Cache is updated for next time</div>
+      </div>
+
+      <p>So the app always opens fast (or with no connection at all), and program corrections still reach you — one visit late, which is fine for a schedule. When the shell's file list changes, the cache name is bumped (<code>…-v6</code>, <code>…-v7</code>) and the worker throws away the old cache wholesale rather than reasoning about individual files.</p>
+
+      <p>The <code>manifest.webmanifest</code> file completes the PWA story: it gives the browser a name, icons, colors, and a start URL, which is what makes "Add to Home Screen" produce something that opens full-screen like a native app.</p>
+
+      <h2><span class="num">07</span> The source boundary</h2>
+
+      <p>The most unusual engineering in this project isn't in the JavaScript — it's in what the app <em>refuses to know</em>. The entire content comes from exactly three public sources: the two program flyers published for the event, and the public Humanitix listing.</p>
+
+      <ul>
+        <li>Names appear only when printed on those flyers. No bios were imported, even where public profiles exist.</li>
+        <li>The flyers publish start times but not end times — so the app shows <strong>only start times</strong> rather than inventing plausible durations.</li>
+        <li>Where the sources contradict each other (the listing disagrees with itself about the event's end time), the conflict is <em>recorded</em> in the source snapshot, not silently resolved.</li>
+      </ul>
+
+      <p>And this is enforced by machine, not just by intention. <code>scripts/validate-data.mjs</code> checks every session against rules like "every item must cite its source image" and "no session may carry a field the sources can't support." It runs as part of the test suite, so a well-meaning future edit that invents an end time would fail before it shipped.</p>
+
+      <div class="callout">
+        <span class="tag">Why it matters</span>
+        Most software bugs are code that does the wrong thing. In a guide like this, the worse failure is <strong>data that says the wrong thing</strong> — an invented room, a misattributed name. Treating "don't invent" as a testable rule, with the source images kept in the repo as evidence, makes the honesty auditable.
+      </div>
+
+      <h2><span class="num">08</span> Tests, the build, and going live</h2>
+
+      <p>Two commands guard the project. <code>npm test</code> is strictly <strong>read-only</strong> — it changes nothing, it only checks: JavaScript syntax, the data provenance rules above, a storage round-trip (export → import → identical state), and a static smoke test that greps for accessibility-critical markup, the service worker's safety checks, and required PWA assets.</p>
+
+      <p><code>npm run build</code> constructs the deployable site in <code>dist/</code> from a <strong>fixed allowlist</strong> — an explicit list of the sixteen attendee-facing files that are permitted to ship. Everything not on the list (source flyers, internal docs, validation scripts, agent notes) is excluded by default. Blocklists forget; allowlists can't leak what they never include.</p>
+
+      <div class="flow">
+        <div class="step"><span class="num">01</span>Edit files</div>
+        <div class="step"><span class="num">02</span>npm test</div>
+        <div class="step"><span class="num">03</span>npm run build</div>
+        <div class="step"><span class="num">04</span>git push</div>
+        <div class="step"><span class="num">05</span>GitHub Pages publishes dist/</div>
+      </div>
+
+      <p>Hosting is <strong>GitHub Pages</strong> — free static hosting driven by a GitHub Actions workflow that runs on every push to <code>main</code>, rebuilds <code>dist/</code> fresh from the allowlist, and publishes only that folder. The workflow's third-party actions are pinned to exact commit hashes (not floating version tags), so a compromised upstream action can't silently swap in new code. Small site, real supply-chain hygiene.</p>
+
+      <h2><span class="num">09</span> The owl</h2>
+
+      <p>Tap the three-dot brand mark five times fast — or type <code>owl</code> on a keyboard — and the guide opens <strong>Night Flight</strong>, a read-only pixel-art overworld (a nod to the Owlgorithms Club on the Day 2 program). Your saved sessions and notes appear as landmarks on a night map, drawn as inline SVG sprites with a self-hosted pixel font.</p>
+
+      <p>Technically it demonstrates a nice pattern: <strong>lazy loading</strong>. The easter egg lives in its own module, <code>owl.js</code>, which is only downloaded when summoned:</p>
+
+      <pre><code><span class="c">// the base guide pays no cost for the surprise</span>
+<span class="k">function</span> summonOwl() {
+  <span class="k">import</span>(<span class="s">"./owl.js"</span>).then((module) =&gt; module.openOwlMode(store));
+}</code></pre>
+
+      <p>It reads the same program data and your same notes, but never writes anything — the easter egg respects the storage schema by staying out of it.</p>
+
+      <h2><span class="num">10</span> What's next: the roadmap</h2>
+
+      <p>The project keeps a public roadmap in the repository (<code>docs/roadmap.md</code>), ordered by when the work matters:</p>
+
+      <ul>
+        <li><strong>Before the summit</strong> — a real-device shakedown of the live deploy (home-screen install, airplane-mode reload, QR scan, a save/note/export round trip), and re-transcribing if the organizers publish an updated flyer. The service worker delivers corrections to installed attendees one visit after each push.</li>
+        <li><strong>During the summit</strong> — a possible "happening now / up next" strip on the Program tab, built honestly from published start times only ("started at 9:05am" rather than invented durations). Room changes are just a data edit, a test run, and a push.</li>
+        <li><strong>After the summit</strong> — archive mode: a quiet "this event has ended" banner, a freeze on data edits, and the guide kept up as a reference. Saved plans stay readable.</li>
+        <li><strong>Parked</strong> — session descriptions, presenter profiles, and calendar export all wait on the organizers publishing the underlying data. The source boundary from section 07 gates the roadmap too: nothing gets built from data the sources don't provide.</li>
+      </ul>
+
+      <p>The stated bar for adding anything: keeps the zero-dependency runtime, respects the source boundary, and doesn't crowd the pocket-program core.</p>
+
+      <h2><span class="num">11</span> Glossary</h2>
+
+      <ul>
+        <li><strong>Static site</strong> — a website that is only files (HTML/CSS/JS), with no server-side logic or database.</li>
+        <li><strong>PWA</strong> — progressive web app: a website that can be installed to a home screen and work offline.</li>
+        <li><strong>Service worker</strong> — a background script that intercepts a site's network requests, enabling caching and offline use.</li>
+        <li><strong>Stale-while-revalidate</strong> — answer from cache immediately, refresh the cache in the background for next time.</li>
+        <li><strong>localStorage</strong> — a browser feature for storing small amounts of text on the user's device, per site.</li>
+        <li><strong>Normalization</strong> — forcing loaded data into an exact expected shape, discarding anything unexpected.</li>
+        <li><strong>&lt;template&gt;</strong> — an HTML element holding markup the browser parses but doesn't render, used as a cloneable blank form.</li>
+        <li><strong>ES module</strong> — a JavaScript file that declares what it imports and exports; the browser loads the graph natively, no bundler needed.</li>
+        <li><strong>Provenance</strong> — a recorded answer to "where did this data come from?", attached to each program item here.</li>
+        <li><strong>Allowlist</strong> — an explicit list of what is permitted (here: files allowed to deploy); the opposite of a blocklist.</li>
+        <li><strong>GitHub Pages / Actions</strong> — GitHub's free static hosting, and the automation that rebuilds the site on every push.</li>
+      </ul>
+
+      <h2><span class="num">12</span> Colophon — how it was actually built</h2>
+
+      <p>This guide was built <strong>conversationally</strong>, in a single day, by describing intent to AI coding agents — the same working method behind the Vibe Coding session on the Day 1 program. The human contribution was the part that doesn't automate: the source boundary, the privacy stance, what the app should refuse to do, and the taste calls. The agents wrote the code, and the test suite in section 08 exists partly so future agents can't drift from those decisions.</p>
+
+      <ul>
+        <li><strong>Structure</strong> — modular, dependency-free pattern carried over from earlier conference guides built the same way</li>
+        <li><strong>Visual system</strong> — evergreen night palette derived from the summit's own public banner artwork; Sora for UI, Source Serif 4 for reading</li>
+        <li><strong>Guardrails</strong> — an <code>AGENTS.md</code> contract in the repo tells any future AI agent the rules before it edits anything</li>
+        <li><strong>Hosting</strong> — GitHub Pages, published from an allowlisted <code>dist/</code> build</li>
+      </ul>
+
+      <p>If you're curious what that workflow feels like, the whole repository is readable at <a href="https://github.com/lpcode808/MPI-EdFuture-26" target="_blank" rel="noreferrer">github.com/lpcode808/MPI-EdFuture-26</a> — start with <code>data/schedule.js</code> (it's just the program, written down), then <code>app.js</code> top to bottom, then <code>storage.js</code>. The three files together are shorter than many README files.</p>
+
+      <footer class="foot">
+        <span><a href="./index.html">← EdFuture 2026 pocket program</a></span>
+        <span>how-this-works.html · Jul 2026</span>
+      </footer>
+
+    </div>
+  </body>
+</html>

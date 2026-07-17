@@ -56,6 +56,7 @@ npm run build
 
 ```text
 index.html                     semantic app shell
+how-this-works.html            behind-the-scenes explainer, linked from the footer
 styles.css                     brand-derived responsive visual system
 app.js                         tabs, search, filters, saved plan, notes, sharing
 owl.js                         a small surprise, loaded only if summoned

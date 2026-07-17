@@ -185,6 +185,23 @@ footer and decodes to the live URL from an on-page screenshot; tap-to-fly lands 
 owl on the tapped tile and the dialog updates; a keypress mid-flight cancels it;
 storage stays byte-identical; `npm test` and `npm run build` green.
 
+## July 17 third pass: behind-the-scenes explainer (Fable)
+
+- **`how-this-works.html`** added at the repo root: a behind-the-scenes tour of the
+  app for a technically curious (not native) audience, following the explainer
+  pattern from `HSG-ArtsFair-Shop/_docs/beginner-explainer.html` and
+  `KSEDTECH-26-present/_docs/beginner-explainer.html` but restyled to this guide's
+  evergreen night identity (Sora / Source Serif 4 / JetBrains Mono). Sections:
+  what it is → static/zero-dep → file map → rendering → localStorage plan →
+  service worker → source boundary → tests/build/deploy → owl → glossary →
+  colophon. Facts cross-checked against README, docs/, storage.js, sw.js, and the
+  SHA-pinned workflow.
+- Linked at the very bottom of `index.html` (`.behind-scenes` in the footer copy,
+  styled in `styles.css`). Added to the build allowlist (dist = 16 files) and the
+  sw shell (cache bumped to `v7`). README project map updated.
+- Page is `noindex` and self-contained; its only external request is the same
+  Google Fonts host the app already uses.
+
 ## What remains
 
 1. Review the local result and commit/push only after explicit approval.

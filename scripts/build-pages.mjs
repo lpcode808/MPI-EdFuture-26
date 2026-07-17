@@ -6,6 +6,7 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "
 const outputRoot = path.join(projectRoot, "dist");
 const runtimeFiles = [
   "index.html",
+  "how-this-works.html",
   "styles.css",
   "app.js",
   "owl.js",
