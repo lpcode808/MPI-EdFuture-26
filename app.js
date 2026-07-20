@@ -79,7 +79,15 @@ function sessionCard(session) {
     noteButton.setAttribute("aria-expanded", String(!noteField.hidden));
     if (!noteField.hidden) textarea.focus();
   });
-  textarea.addEventListener("input", () => store.setSessionNote(session.id, textarea.value));
+  textarea.addEventListener("input", () => {
+    store.setSessionNote(session.id, textarea.value);
+    // The same session renders as a second card in the other panel, and typing
+    // never re-renders; mirror the twin editor so it can't show (or save over
+    // the note with) a stale value.
+    document.querySelectorAll(`[data-session-id="${session.id}"] .session-notes textarea`).forEach((twin) => {
+      if (twin !== textarea && twin.value !== textarea.value) twin.value = textarea.value;
+    });
+  });
   return node;
 }
 
