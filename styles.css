@@ -159,6 +159,41 @@ img { display: block; max-width: 100%; }
 .brand-mark i:nth-child(2) { height: 73%; background: var(--color-primary-soft); }
 .brand-mark i:nth-child(3) { height: 46%; background: var(--color-sage); }
 
+.storage-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 100vw;
+  padding: 0.6rem max(1rem, env(safe-area-inset-right)) 0.6rem max(1rem, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-mist);
+}
+
+.storage-banner p {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.storage-banner button {
+  flex: 0 0 auto;
+  width: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-ink-muted);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.storage-banner button:hover { background: var(--color-sage-light); color: var(--color-ink); }
+
 .source-link {
   flex: 0 0 auto;
   min-height: 44px;

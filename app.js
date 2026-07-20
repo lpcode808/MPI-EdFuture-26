@@ -234,6 +234,19 @@ document.querySelector("#shareButton").addEventListener("click", async () => {
   }
 });
 
+const storageBanner = document.querySelector("#storageBanner");
+const storageBannerKey = `${EVENT.storagePrefix}_storage_banner_dismissed`;
+try {
+  if (!localStorage.getItem(storageBannerKey)) storageBanner.hidden = false;
+} catch {
+  // If localStorage can't even be read, still surface the notice.
+  storageBanner.hidden = false;
+}
+document.querySelector("#storageBannerClose").addEventListener("click", () => {
+  storageBanner.hidden = true;
+  try { localStorage.setItem(storageBannerKey, "1"); } catch { /* Private browsing may block this; the banner just reappears next visit. */ }
+});
+
 document.querySelector("#sourceStatus").textContent = EVENT.dataStatus.message;
 document.querySelector("#sessionCount").textContent = SESSIONS.length;
 
