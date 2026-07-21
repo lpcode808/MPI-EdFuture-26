@@ -148,7 +148,7 @@ function renderPeople() {
 
 function updateNotesCount() {
   const state = store.get();
-  const count = Object.values(state.sessionNotes).filter((note) => note.trim()).length + (state.quickNotes.trim() ? 1 : 0);
+  const count = Object.values(state.sessionNotes).filter((note) => note.trim()).length;
   const badge = document.querySelector("#notesCount");
   badge.textContent = count;
   badge.setAttribute("aria-label", `${count} note${count === 1 ? "" : "s"}`);
