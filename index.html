@@ -79,7 +79,7 @@
           <header class="section-heading">
             <p class="eyebrow">Single track, one room</p>
             <h2>Everyone in the program.</h2>
-            <p>Since every session runs for the whole room, there's nothing to plan around — just people worth finding. Tap a name to jump to their session.</p>
+            <p>Since every session runs for the whole room, there's nothing to plan around — just people worth finding. Tap a name to jump to their session; tap the note button to add a private note.</p>
           </header>
           <div id="peopleList"></div>
         </section>
@@ -88,14 +88,16 @@
           <header class="section-heading">
             <p class="eyebrow">Stored only in this browser</p>
             <h2>Everything you've written down.</h2>
-            <p>Add a private note from any session in the Program tab — it shows up here too. Nothing is sent to a server.</p>
+            <p>Private notes from sessions, speakers, and quick jots show up here. Nothing is sent to a server.</p>
           </header>
           <div id="notesList"></div>
-          <label class="notes-field quick-notes">
-            <span>Quick notes</span>
-            <textarea id="quickNotes" rows="6" placeholder="Questions, people to find, ideas to bring back…"></textarea>
-            <small id="notesStatus" aria-live="polite">Saved on this device.</small>
-          </label>
+          <div id="quickNotes" class="quick-notes">
+            <div class="quick-notes-header">
+              <h3>Quick notes</h3>
+              <button id="addQuickNote" class="button secondary" type="button">Add quick note</button>
+            </div>
+            <div id="quickNotesList"></div>
+          </div>
           <div class="data-actions">
             <button id="exportButton" class="button secondary" type="button">Export backup</button>
             <label class="button secondary">Import backup<input id="importInput" type="file" accept="application/json" hidden></label>
@@ -157,7 +159,6 @@
           <button class="note-toggle" type="button" aria-expanded="false">
             <span class="note-label">Add a note</span>
             <span class="note-chevron" aria-hidden="true"></span>
-            <span class="note-dot" aria-hidden="true"></span>
           </button>
           <div class="note-body" hidden>
             <label class="notes-field session-notes">

@@ -600,16 +600,6 @@ h1 em {
 
 .note-label { flex: 1; }
 
-.note-dot {
-  width: 7px;
-  height: 7px;
-  background: var(--color-primary);
-  border-radius: 50%;
-  display: none;
-}
-
-.note-toggle.has-note .note-dot { display: block; }
-
 .note-chevron {
   width: 0;
   height: 0;
@@ -709,7 +699,11 @@ h1 em {
 .people-directory { border-top: 1px solid var(--color-line); }
 
 .people-row {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
   width: 100%;
   padding: 0.85rem 0;
   border: 0;
@@ -717,10 +711,20 @@ h1 em {
   background: transparent;
   color: inherit;
   text-align: left;
+}
+
+.people-row-main {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
 }
 
-.people-row:hover .people-row-name { color: var(--color-primary-hover); }
+.people-row-main:hover .people-row-name { color: var(--color-primary-hover); }
 
 .people-row-name {
   display: block;
@@ -737,6 +741,17 @@ h1 em {
   font-family: var(--font-ui);
   font-size: 0.7rem;
   letter-spacing: 0.01em;
+}
+
+.people-note-toggle {
+  flex: 0 0 auto;
+  margin-top: 0;
+  padding: 0.5rem 0.75rem;
+}
+
+.people-row .note-body {
+  width: 100%;
+  flex-basis: 100%;
 }
 
 .saved-day { margin: 2rem 0; }
@@ -772,6 +787,55 @@ h1 em {
 .saved-empty > span { color: var(--color-primary-soft); font-size: 2rem; }
 
 .quick-notes { margin-top: 3rem; }
+
+.quick-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.quick-notes-header h3 {
+  margin: 0;
+  color: var(--color-primary);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.quick-notes-empty {
+  margin: 1rem 0;
+  color: var(--color-ink-muted);
+  font-size: 0.95rem;
+}
+
+.quick-note-item {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+}
+
+.note-delete {
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--color-ink-muted);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.note-delete:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
 
 .data-actions {
   display: flex;

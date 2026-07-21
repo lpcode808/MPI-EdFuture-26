@@ -9,13 +9,22 @@ const agendaList = document.querySelector("#agendaList");
 const peopleList = document.querySelector("#peopleList");
 const notesList = document.querySelector("#notesList");
 const searchInput = document.querySelector("#agendaSearch");
-const quickNotes = document.querySelector("#quickNotes");
+const quickNotesList = document.querySelector("#quickNotesList");
+const addQuickNote = document.querySelector("#addQuickNote");
 const dayFilters = document.querySelector("#dayFilters");
 const template = document.querySelector("#sessionTemplate");
 let activeDay = "all";
 // Which sessions have their note editor open in the Program tab. Lives outside
 // the render cycle so a search keystroke doesn't silently fold editors shut.
 const openNoteIds = new Set();
+// Which people have their note editor open in the People tab.
+const openPersonIds = new Set();
+
+// Treat names with a " — School/Org" suffix as the same person as the bare name.
+function canonicalName(person) {
+  const match = person.match(/(.+?)\s+[—–-]\s+/);
+  return match ? match[1].trim() : person.trim();
+}
 
 function matchesSearch(session, query) {
   if (!query) return true;
@@ -152,11 +161,13 @@ function renderPeople() {
   const directory = new Map();
   SESSIONS.forEach((session) => {
     session.people.forEach((person) => {
-      if (!directory.has(person)) directory.set(person, []);
-      directory.get(person).push(session);
+      const key = canonicalName(person);
+      if (!directory.has(key)) directory.set(key, { displayName: key, sessions: [] });
+      directory.get(key).sessions.push(session);
     });
   });
-  const people = [...directory.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  const people = [...directory.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
+  const state = store.get();
 
   peopleList.replaceChildren();
   if (!people.length) {
@@ -169,26 +180,158 @@ function renderPeople() {
 
   const list = document.createElement("div");
   list.className = "people-directory";
-  people.forEach(([person, sessions]) => {
-    const row = document.createElement("button");
-    row.type = "button";
+  people.forEach((person) => {
+    const saved = state.personNotes[person.displayName] || "";
+    const hasNote = saved.trim().length > 0;
+    const row = document.createElement("div");
     row.className = "people-row";
-    const sessionLabel = sessions
+    row.dataset.personId = person.displayName;
+    const sessionLabel = person.sessions
       .map((session) => `${DAYS.find((day) => day.id === session.dayId).label} · ${session.time} · ${session.title}`)
       .join(" · ");
-    row.innerHTML = `<span class="people-row-name">${person}</span><span class="people-row-sessions">${sessionLabel}</span>`;
-    row.addEventListener("click", () => goToSession(person));
+
+    const main = document.createElement("button");
+    main.type = "button";
+    main.className = "people-row-main";
+    main.innerHTML = `<span class="people-row-name">${person.displayName}</span><span class="people-row-sessions">${sessionLabel}</span>`;
+    main.addEventListener("click", () => goToSession(person.displayName));
+
+    const noteToggle = document.createElement("button");
+    noteToggle.type = "button";
+    noteToggle.className = "note-toggle people-note-toggle";
+    noteToggle.setAttribute("aria-expanded", String(openPersonIds.has(person.displayName)));
+    noteToggle.innerHTML = `<span class="note-label">${hasNote ? "Edit note" : "Add a note"}</span><span class="note-chevron" aria-hidden="true"></span>`;
+
+    const noteBody = document.createElement("div");
+    noteBody.className = "note-body";
+    noteBody.hidden = !openPersonIds.has(person.displayName);
+    noteBody.innerHTML = `<label class="notes-field person-notes"><span>Private note for ${person.displayName}</span><textarea rows="3" placeholder="What to ask, what stood out, how to follow up…"></textarea><div class="note-actions"><small>Saved on this device.</small><button class="note-save" type="button">Save note</button></div></label>`;
+    const textarea = noteBody.querySelector("textarea");
+    const status = noteBody.querySelector("small");
+    textarea.value = saved;
+    noteToggle.classList.toggle("has-note", hasNote);
+
+    function saveAndSyncPerson() {
+      const text = textarea.value;
+      store.setPersonNote(person.displayName, text);
+      updateNotesCount();
+      const nowHasNote = text.trim().length > 0;
+      noteToggle.querySelector(".note-label").textContent = nowHasNote ? "Edit note" : "Add a note";
+      noteToggle.classList.toggle("has-note", nowHasNote);
+      status.textContent = "Saved on this device.";
+      status.classList.remove("unsaved");
+    }
+
+    noteToggle.addEventListener("click", () => {
+      const opening = noteBody.hidden;
+      if (opening) openPersonIds.add(person.displayName);
+      else openPersonIds.delete(person.displayName);
+      noteBody.hidden = !opening;
+      noteToggle.setAttribute("aria-expanded", String(!noteBody.hidden));
+      if (!noteBody.hidden) textarea.focus();
+    });
+
+    noteBody.querySelector(".note-save").addEventListener("click", () => {
+      saveAndSyncPerson();
+      textarea.focus();
+    });
+
+    textarea.addEventListener("input", () => {
+      status.textContent = "Not saved yet.";
+      status.classList.add("unsaved");
+    });
+
+    textarea.addEventListener("blur", () => {
+      saveAndSyncPerson();
+    });
+
+    row.append(main, noteToggle, noteBody);
     list.append(row);
   });
   peopleList.append(list);
 }
 
-function updateNotesCount() {
+function noteCount() {
   const state = store.get();
-  const count = Object.values(state.sessionNotes).filter((note) => note.trim()).length;
+  const sessionCount = Object.values(state.sessionNotes).filter((note) => note.trim()).length;
+  const personCount = Object.values(state.personNotes).filter((note) => note.trim()).length;
+  const quickCount = state.quickNotes.filter((item) => item.text.trim()).length;
+  return sessionCount + personCount + quickCount;
+}
+
+function updateNotesCount() {
+  const count = noteCount();
   const badge = document.querySelector("#notesCount");
   badge.textContent = count;
   badge.setAttribute("aria-label", `${count} note${count === 1 ? "" : "s"}`);
+}
+
+function renderQuickNotes() {
+  const state = store.get();
+  quickNotesList.replaceChildren();
+  if (!state.quickNotes.length) {
+    const empty = document.createElement("p");
+    empty.className = "quick-notes-empty";
+    empty.textContent = "No quick notes yet. Tap Add quick note to start one.";
+    quickNotesList.append(empty);
+    return;
+  }
+
+  state.quickNotes.forEach((item) => {
+    const note = document.createElement("div");
+    note.className = "quick-note-item";
+    note.dataset.quickNoteId = item.id;
+
+    const label = document.createElement("label");
+    label.className = "notes-field";
+    const title = document.createElement("span");
+    title.textContent = "Quick note";
+    const textarea = document.createElement("textarea");
+    textarea.rows = 3;
+    textarea.placeholder = "Question, idea, or reminder…";
+    textarea.value = item.text;
+    const actions = document.createElement("div");
+    actions.className = "note-actions";
+    const status = document.createElement("small");
+    status.textContent = "Saved on this device.";
+    const saveButton = document.createElement("button");
+    saveButton.type = "button";
+    saveButton.className = "note-save";
+    saveButton.textContent = "Save note";
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "note-delete";
+    deleteButton.textContent = "Delete";
+    actions.append(status, saveButton, deleteButton);
+    label.append(title, textarea, actions);
+    note.append(label);
+
+    function save() {
+      store.updateQuickNote(item.id, textarea.value);
+      updateNotesCount();
+      status.textContent = "Saved on this device.";
+      status.classList.remove("unsaved");
+    }
+
+    textarea.addEventListener("input", () => {
+      status.textContent = "Not saved yet.";
+      status.classList.add("unsaved");
+    });
+
+    saveButton.addEventListener("click", () => {
+      save();
+      textarea.focus();
+    });
+
+    textarea.addEventListener("blur", save);
+    deleteButton.addEventListener("click", () => {
+      store.deleteQuickNote(item.id);
+      renderQuickNotes();
+      updateNotesCount();
+    });
+
+    quickNotesList.append(note);
+  });
 }
 
 function renderNotes() {
@@ -199,7 +342,7 @@ function renderNotes() {
   if (!noted.length) {
     const empty = document.createElement("div");
     empty.className = "empty-state saved-empty";
-    empty.innerHTML = '<span aria-hidden="true">◇</span><h3>No notes yet.</h3><p>Open the note icon beside any program item to jot something down — it shows up here.</p>';
+    empty.innerHTML = '<span aria-hidden="true">◇</span><h3>No session notes yet.</h3><p>Open the note icon beside any program item to jot something down — it shows up here.</p>';
     notesList.append(empty);
   } else {
     DAYS.forEach((day) => {
@@ -212,10 +355,7 @@ function renderNotes() {
       notesList.append(section);
     });
   }
-  // Assigning .value unconditionally would collapse the caret to the end on
-  // every unrelated re-render (e.g. typing a session note while quick notes
-  // are also open).
-  if (quickNotes.value !== state.quickNotes) quickNotes.value = state.quickNotes;
+  renderQuickNotes();
 }
 
 function renderAll() {
@@ -265,8 +405,11 @@ tabs.forEach((tab, index) => {
 });
 
 searchInput.addEventListener("input", renderAgenda);
-quickNotes.addEventListener("input", () => {
-  store.setQuickNotes(quickNotes.value);
+addQuickNote.addEventListener("click", () => {
+  const id = store.addQuickNote("");
+  renderQuickNotes();
+  const newItem = quickNotesList.querySelector(`[data-quick-note-id="${id}"]`);
+  if (newItem) newItem.querySelector("textarea").focus();
   updateNotesCount();
 });
 
