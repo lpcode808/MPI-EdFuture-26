@@ -610,6 +610,17 @@ h1 em {
 
 .note-toggle.has-note .note-dot { display: block; }
 
+.note-chevron {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid var(--color-primary-soft);
+  transition: transform 180ms ease;
+}
+
+.note-toggle[aria-expanded="true"] .note-chevron { transform: rotate(90deg); }
+
 .note-body { padding-top: 0.25rem; }
 
 .note-actions {
