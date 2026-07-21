@@ -230,6 +230,7 @@ day (no bookmarking needed when everyone's in the same room). Changes:
 
 ## What remains
 
-1. Review the local result and commit/push only after explicit approval.
+1. Run the checklist in `VERIFY-BEFORE-PUSH.md` (storage migration, People tab, Notes
+   tab, and a regression sweep) before this local commit is pushed to `main`.
 2. Enable GitHub Pages with GitHub Actions if the repository setting is not already active.
 3. After publishing, verify the live root, banner, manifest, program search, People, Notes, and an offline reload.
