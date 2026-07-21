@@ -49,31 +49,68 @@ function sessionCard(session, { forceOpen = false } = {}) {
   people.textContent = session.people.join(" · ");
   people.hidden = session.people.length === 0;
 
-  const noteButton = node.querySelector(".note-button");
-  const noteField = node.querySelector(".session-notes");
-  const textarea = noteField.querySelector("textarea");
-  textarea.value = state.sessionNotes[session.id] || "";
-  noteField.hidden = forceOpen ? false : !openNoteIds.has(session.id);
-  node.querySelector(".session-actions").hidden = forceOpen;
-  noteButton.setAttribute("aria-expanded", String(!noteField.hidden));
-  noteButton.querySelector("span").textContent = `Add a private note for ${session.title}`;
-  noteButton.addEventListener("click", () => {
-    if (noteField.hidden) openNoteIds.add(session.id);
-    else openNoteIds.delete(session.id);
-    noteField.hidden = !noteField.hidden;
-    noteButton.setAttribute("aria-expanded", String(!noteField.hidden));
-    if (!noteField.hidden) textarea.focus();
-  });
-  textarea.addEventListener("input", () => {
-    store.setSessionNote(session.id, textarea.value);
+  const noteToggle = node.querySelector(".note-toggle");
+  const noteLabel = noteToggle.querySelector(".note-label");
+  const noteBody = node.querySelector(".note-body");
+  const textarea = noteBody.querySelector("textarea");
+  const status = noteBody.querySelector("small");
+  const saveButton = noteBody.querySelector(".note-save");
+
+  const saved = state.sessionNotes[session.id] || "";
+  const hasNote = saved.trim().length > 0;
+  textarea.value = saved;
+  noteLabel.textContent = hasNote ? "Edit note" : "Add a note";
+  noteToggle.classList.toggle("has-note", hasNote);
+  noteBody.hidden = forceOpen ? false : !openNoteIds.has(session.id);
+  noteToggle.setAttribute("aria-expanded", String(!noteBody.hidden));
+
+  function saveAndSync() {
+    const text = textarea.value;
+    store.setSessionNote(session.id, text);
     updateNotesCount();
-    // The same session can render as a second card in the Notes tab, and
-    // typing never re-renders; mirror the twin editor so it can't show (or
-    // save over the note with) a stale value.
-    document.querySelectorAll(`[data-session-id="${session.id}"] .session-notes textarea`).forEach((twin) => {
-      if (twin !== textarea && twin.value !== textarea.value) twin.value = textarea.value;
+    const nowHasNote = text.trim().length > 0;
+    noteLabel.textContent = nowHasNote ? "Edit note" : "Add a note";
+    noteToggle.classList.toggle("has-note", nowHasNote);
+    status.textContent = "Saved on this device.";
+    status.classList.remove("unsaved");
+    // The same session can render as a second card in the Notes tab. Typing
+    // never re-renders, but a save should keep both copies in sync.
+    document.querySelectorAll(`[data-session-id="${session.id}"] textarea`).forEach((twin) => {
+      if (twin !== textarea && twin.value !== text) twin.value = text;
     });
+    document.querySelectorAll(`[data-session-id="${session.id}"] .note-toggle`).forEach((twinToggle) => {
+      if (twinToggle !== noteToggle) {
+        twinToggle.classList.toggle("has-note", nowHasNote);
+        const twinLabel = twinToggle.querySelector(".note-label");
+        if (twinLabel) twinLabel.textContent = nowHasNote ? "Edit note" : "Add a note";
+      }
+    });
+  }
+
+  noteToggle.addEventListener("click", () => {
+    const opening = noteBody.hidden;
+    if (opening) openNoteIds.add(session.id);
+    else openNoteIds.delete(session.id);
+    noteBody.hidden = !opening;
+    noteToggle.setAttribute("aria-expanded", String(!noteBody.hidden));
+    if (!noteBody.hidden) textarea.focus();
   });
+
+  saveButton.addEventListener("click", () => {
+    saveAndSync();
+    textarea.focus();
+  });
+
+  textarea.addEventListener("input", () => {
+    status.textContent = "Not saved yet.";
+    status.classList.add("unsaved");
+  });
+
+  textarea.addEventListener("blur", () => {
+    // Save when the user leaves the field, so tapping outside doesn't lose text.
+    saveAndSync();
+  });
+
   return node;
 }
 
