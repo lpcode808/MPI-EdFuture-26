@@ -21,7 +21,7 @@ export const SESSIONS = Object.freeze([
 
   { id: "d2-welcome", dayId: "day-2", time: "8:00am", title: "Welcome", room: "Scudder / Bakken Auditorium", kind: "program", people: [] },
   { id: "d2-keynote", dayId: "day-2", time: "8:15am", title: "Keynote", room: "Bakken Auditorium", kind: "keynote", people: ["Mark Sparvell"] },
-  { id: "d2-school-share", dayId: "day-2", time: "9:00am", title: "School Share Session", room: "Bakken Auditorium", kind: "session", people: [] },
+  { id: "d2-school-share", dayId: "day-2", time: "9:00am", title: "School Share Session", room: "Bakken Auditorium", kind: "session", people: ["Justin Lai — Hawaiʻi School for Girls", "Gabe Yanagihara — Iolani School", "Mimi Wong/Bhonna Nakama — Kamehameha Schools", "Shane Asselstine — HIDOE", "Sydney T, Ray L — Mid-Pacific Institute"] },
   { id: "d2-break-1", dayId: "day-2", time: "10:00am", title: "Break", room: null, kind: "break", people: [] },
   { id: "d2-k12-table-walk", dayId: "day-2", time: "10:15am", title: "K–12 School Share Table Walk", room: "Wood Hall", kind: "activity", people: [] },
   { id: "d2-break-2", dayId: "day-2", time: "10:45am", title: "Break", room: null, kind: "break", people: [] },

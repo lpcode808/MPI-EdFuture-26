@@ -10,10 +10,10 @@ const restored = normalizeStoredState({
   quickNotes: "Ask about the student showcase."
 });
 
-assert.deepEqual(restored.savedSessionIds, ["d1-welcome"]);
+assert.equal("savedSessionIds" in restored, false);
 assert.deepEqual(restored.sessionNotes, { "d1-welcome": "Meet in the lobby." });
 assert.equal(restored.quickNotes, "Ask about the student showcase.");
-assert.equal(restored.schemaVersion, 1);
+assert.equal(restored.schemaVersion, 2);
 
 console.log("Storage normalization round-trip passed.");
 

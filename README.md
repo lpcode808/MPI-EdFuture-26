@@ -4,16 +4,16 @@
 
 It works on any phone or laptop browser — no install, no account. Add it to your home screen and it keeps working offline, which helps on summit wifi.
 
-This is an unofficial, mobile-first companion for the Third Annual Mid-Pacific EdFuture Summit, July 21–22, 2026, at Mid-Pacific Institute in Honolulu. Browse the two-day program, build a personal plan, and keep private notes — everything stays on your own device.
+This is an unofficial, mobile-first companion for the Third Annual Mid-Pacific EdFuture Summit, July 21–22, 2026, at Mid-Pacific Institute in Honolulu. Browse the two-day program, look up who's presenting, and keep private notes — everything stays on your own device.
 
 ## What you can do with it
 
 - Browse all 29 published program items across the two days
 - Search by title, presenter, room, or program type
 - Filter to either day
-- Save a private personal plan
+- Look up every named presenter in the People tab and jump straight to their session
 - Add per-session and quick notes, stored only in your browser
-- Export a JSON backup of your plan and import it on another device
+- Export a JSON backup of your notes and import it on another device
 - Share the guide link, or let someone scan the QR code in the footer
 - Install it as an offline-capable app
 - Navigate fully by keyboard, with visible focus, 44px touch targets, and reduced-motion support
@@ -27,7 +27,7 @@ The guide uses only:
 - the two supplied public program images in `scraped/`; and
 - attendee-facing facts from the public [Humanitix listing](https://events.humanitix.com/2026edfuturesummit).
 
-Names appear only when printed in those public program images. The project contains no attendee list, private contact data, predecessor conference content, analytics, account system, or backend. Saved items and notes stay in `localStorage` until the attendee exports them or clears site data.
+Names appear only when printed in those public program images. The project contains no attendee list, private contact data, predecessor conference content, analytics, account system, or backend. Notes stay in `localStorage` until the attendee exports them or clears site data.
 
 The sources do not publish session end times or descriptions, so the app shows only the published start times. Humanitix also conflicts about event end times and ticket status; those conflicts are recorded in `scraped/humanitix-public-facts.json` and are not silently resolved.
 
@@ -58,7 +58,7 @@ npm run build
 index.html                     semantic app shell
 how-this-works.html            behind-the-scenes explainer, linked from the footer
 styles.css                     brand-derived responsive visual system
-app.js                         tabs, search, filters, saved plan, notes, sharing
+app.js                         tabs, search, filters, people directory, notes, sharing
 owl.js                         a small surprise, loaded only if summoned
 storage.js                     versioned local persistence and normalization
 sw.js                          offline app-shell service worker

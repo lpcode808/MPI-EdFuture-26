@@ -1,16 +1,13 @@
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 function emptyState() {
-  return { schemaVersion: SCHEMA_VERSION, savedSessionIds: [], sessionNotes: {}, quickNotes: "" };
+  return { schemaVersion: SCHEMA_VERSION, sessionNotes: {}, quickNotes: "" };
 }
 
 function normalize(value) {
   const source = value && typeof value === "object" ? value : {};
   return {
     schemaVersion: SCHEMA_VERSION,
-    savedSessionIds: Array.isArray(source.savedSessionIds)
-      ? [...new Set(source.savedSessionIds.filter((id) => typeof id === "string"))]
-      : [],
     sessionNotes: source.sessionNotes && typeof source.sessionNotes === "object"
       ? Object.fromEntries(Object.entries(source.sessionNotes).filter(([id, note]) => typeof id === "string" && typeof note === "string"))
       : {},
@@ -23,7 +20,21 @@ export function createStore(prefix) {
   let state = emptyState();
 
   try {
-    state = normalize(JSON.parse(localStorage.getItem(key)));
+    const stored = localStorage.getItem(key);
+    if (stored !== null) {
+      state = normalize(JSON.parse(stored));
+    } else {
+      // A device may still hold notes under an older schema key (e.g. the v1
+      // bookmark-era shape). Carry sessionNotes/quickNotes forward instead of
+      // silently losing them the first time this schema version loads.
+      const legacyKey = `${prefix}_attendee_state_v1`;
+      const legacy = localStorage.getItem(legacyKey);
+      if (legacy !== null) {
+        state = normalize(JSON.parse(legacy));
+        localStorage.setItem(key, JSON.stringify(state));
+        localStorage.removeItem(legacyKey);
+      }
+    }
   } catch {
     state = emptyState();
   }
@@ -38,13 +49,6 @@ export function createStore(prefix) {
 
   return {
     get: () => structuredClone(state),
-    toggleSaved(id) {
-      const saved = new Set(state.savedSessionIds);
-      saved.has(id) ? saved.delete(id) : saved.add(id);
-      state.savedSessionIds = [...saved];
-      persist();
-      return state.savedSessionIds.includes(id);
-    },
     setSessionNote(id, note) {
       state.sessionNotes[id] = note;
       persist();

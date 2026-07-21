@@ -6,14 +6,15 @@ const store = createStore(EVENT.storagePrefix);
 const tabs = [...document.querySelectorAll('[role="tab"]')];
 const panels = [...document.querySelectorAll('[role="tabpanel"]')];
 const agendaList = document.querySelector("#agendaList");
-const savedList = document.querySelector("#savedList");
+const peopleList = document.querySelector("#peopleList");
+const notesList = document.querySelector("#notesList");
 const searchInput = document.querySelector("#agendaSearch");
 const quickNotes = document.querySelector("#quickNotes");
 const dayFilters = document.querySelector("#dayFilters");
 const template = document.querySelector("#sessionTemplate");
 let activeDay = "all";
-// Which sessions have their note editor open. Lives outside the render cycle
-// so a search keystroke or bookmark toggle doesn't silently fold editors shut.
+// Which sessions have their note editor open in the Program tab. Lives outside
+// the render cycle so a search keystroke doesn't silently fold editors shut.
 const openNoteIds = new Set();
 
 function matchesSearch(session, query) {
@@ -30,10 +31,11 @@ function filteredSessions() {
   return SESSIONS.filter((session) => (activeDay === "all" || session.dayId === activeDay) && matchesSearch(session, query));
 }
 
-function sessionCard(session) {
+// `forceOpen` renders the note field open with no toggle, for the Notes tab
+// (which only lists sessions that already have a note attached to them).
+function sessionCard(session, { forceOpen = false } = {}) {
   const state = store.get();
   const node = template.content.firstElementChild.cloneNode(true);
-  const isSaved = state.savedSessionIds.includes(session.id);
   const day = DAYS.find((item) => item.id === session.dayId);
   node.dataset.sessionId = session.id;
   node.classList.toggle("is-break", session.kind === "break");
@@ -47,29 +49,12 @@ function sessionCard(session) {
   people.textContent = session.people.join(" · ");
   people.hidden = session.people.length === 0;
 
-  const saveButton = node.querySelector(".save-button");
-  saveButton.classList.toggle("is-saved", isSaved);
-  saveButton.setAttribute("aria-pressed", String(isSaved));
-  saveButton.querySelector("span").textContent = `${isSaved ? "Remove" : "Save"} ${session.title} ${isSaved ? "from" : "to"} my plan`;
-  saveButton.addEventListener("click", () => {
-    const container = node.closest("#savedList") ? savedList : agendaList;
-    store.toggleSaved(session.id);
-    renderAll();
-    // The agenda fallback only works while its panel is visible; a hidden
-    // panel's buttons refuse focus and keyboard users get dumped to <body>.
-    const agendaVisible = !agendaList.closest(".panel").hidden;
-    const replacement = container.querySelector(`[data-session-id="${session.id}"] .save-button`)
-      || (agendaVisible && agendaList.querySelector(`[data-session-id="${session.id}"] .save-button`))
-      || container.querySelector(".save-button")
-      || document.querySelector("#tab-saved");
-    replacement?.focus();
-  });
-
   const noteButton = node.querySelector(".note-button");
   const noteField = node.querySelector(".session-notes");
   const textarea = noteField.querySelector("textarea");
   textarea.value = state.sessionNotes[session.id] || "";
-  noteField.hidden = !openNoteIds.has(session.id);
+  noteField.hidden = forceOpen ? false : !openNoteIds.has(session.id);
+  node.querySelector(".session-actions").hidden = forceOpen;
   noteButton.setAttribute("aria-expanded", String(!noteField.hidden));
   noteButton.querySelector("span").textContent = `Add a private note for ${session.title}`;
   noteButton.addEventListener("click", () => {
@@ -81,9 +66,10 @@ function sessionCard(session) {
   });
   textarea.addEventListener("input", () => {
     store.setSessionNote(session.id, textarea.value);
-    // The same session renders as a second card in the other panel, and typing
-    // never re-renders; mirror the twin editor so it can't show (or save over
-    // the note with) a stale value.
+    updateNotesCount();
+    // The same session can render as a second card in the Notes tab, and
+    // typing never re-renders; mirror the twin editor so it can't show (or
+    // save over the note with) a stale value.
     document.querySelectorAll(`[data-session-id="${session.id}"] .session-notes textarea`).forEach((twin) => {
       if (twin !== textarea && twin.value !== textarea.value) twin.value = textarea.value;
     });
@@ -118,36 +104,87 @@ function renderAgenda() {
   });
 }
 
-function renderSaved() {
+function goToSession(query) {
+  searchInput.value = query;
+  activateTab(document.querySelector("#tab-agenda"));
+  renderAgenda();
+  agendaList.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderPeople() {
+  const directory = new Map();
+  SESSIONS.forEach((session) => {
+    session.people.forEach((person) => {
+      if (!directory.has(person)) directory.set(person, []);
+      directory.get(person).push(session);
+    });
+  });
+  const people = [...directory.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+
+  peopleList.replaceChildren();
+  if (!people.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.innerHTML = "<h2>No presenters yet.</h2><p>Named presenters will appear here as the program is confirmed.</p>";
+    peopleList.append(empty);
+    return;
+  }
+
+  const list = document.createElement("div");
+  list.className = "people-directory";
+  people.forEach(([person, sessions]) => {
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "people-row";
+    const sessionLabel = sessions
+      .map((session) => `${DAYS.find((day) => day.id === session.dayId).label} · ${session.time} · ${session.title}`)
+      .join(" · ");
+    row.innerHTML = `<span class="people-row-name">${person}</span><span class="people-row-sessions">${sessionLabel}</span>`;
+    row.addEventListener("click", () => goToSession(person));
+    list.append(row);
+  });
+  peopleList.append(list);
+}
+
+function updateNotesCount() {
   const state = store.get();
-  const saved = SESSIONS.filter((session) => state.savedSessionIds.includes(session.id));
-  savedList.replaceChildren();
-  document.querySelector("#savedCount").textContent = saved.length;
-  document.querySelector("#savedCount").setAttribute("aria-label", `${saved.length} saved`);
-  if (!saved.length) {
+  const count = Object.values(state.sessionNotes).filter((note) => note.trim()).length + (state.quickNotes.trim() ? 1 : 0);
+  const badge = document.querySelector("#notesCount");
+  badge.textContent = count;
+  badge.setAttribute("aria-label", `${count} note${count === 1 ? "" : "s"}`);
+}
+
+function renderNotes() {
+  const state = store.get();
+  const noted = SESSIONS.filter((session) => (state.sessionNotes[session.id] || "").trim());
+  notesList.replaceChildren();
+  updateNotesCount();
+  if (!noted.length) {
     const empty = document.createElement("div");
     empty.className = "empty-state saved-empty";
-    empty.innerHTML = '<span aria-hidden="true">◇</span><h3>Your plan is open.</h3><p>Use the bookmark beside any program item to collect it here.</p>';
-    savedList.append(empty);
+    empty.innerHTML = '<span aria-hidden="true">◇</span><h3>No notes yet.</h3><p>Open the note icon beside any program item to jot something down — it shows up here.</p>';
+    notesList.append(empty);
   } else {
     DAYS.forEach((day) => {
-      const items = saved.filter((session) => session.dayId === day.id);
+      const items = noted.filter((session) => session.dayId === day.id);
       if (!items.length) return;
       const section = document.createElement("section");
       section.className = "saved-day";
       section.innerHTML = `<h3>${day.label} · ${day.title}</h3>`;
-      items.forEach((session) => section.append(sessionCard(session)));
-      savedList.append(section);
+      items.forEach((session) => section.append(sessionCard(session, { forceOpen: true })));
+      notesList.append(section);
     });
   }
   // Assigning .value unconditionally would collapse the caret to the end on
-  // every unrelated re-render (e.g. bookmarking while a note is mid-edit).
+  // every unrelated re-render (e.g. typing a session note while quick notes
+  // are also open).
   if (quickNotes.value !== state.quickNotes) quickNotes.value = state.quickNotes;
 }
 
 function renderAll() {
   renderAgenda();
-  renderSaved();
+  renderPeople();
+  renderNotes();
 }
 
 function activateTab(tab) {
@@ -191,13 +228,16 @@ tabs.forEach((tab, index) => {
 });
 
 searchInput.addEventListener("input", renderAgenda);
-quickNotes.addEventListener("input", () => store.setQuickNotes(quickNotes.value));
+quickNotes.addEventListener("input", () => {
+  store.setQuickNotes(quickNotes.value);
+  updateNotesCount();
+});
 
 document.querySelector("#exportButton").addEventListener("click", () => {
   const blob = new Blob([JSON.stringify(store.exportEnvelope(EVENT.id), null, 2)], { type: "application/json" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "edfuture-2026-plan.json";
+  link.download = "edfuture-2026-notes.json";
   link.click();
   URL.revokeObjectURL(link.href);
 });

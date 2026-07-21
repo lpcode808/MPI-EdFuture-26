@@ -202,8 +202,34 @@ storage stays byte-identical; `npm test` and `npm run build` green.
 - Page is `noindex` and self-contained; its only external request is the same
   Google Fonts host the app already uses.
 
+## July 20 pass: drop bookmarks, add People + Notes tabs (Devin CLI)
+
+Justin flagged that notes felt under-built for how important they are on a single-track
+day (no bookmarking needed when everyone's in the same room). Changes:
+
+- **Removed session bookmarking entirely** — no more "My plan" tab, `save-button`, or
+  `savedSessionIds`. `storage.js` schema bumped to `v2` (`sessionNotes` + `quickNotes` only).
+  `createStore` migrates a device's old `_v1` blob into the new `_v2` key on first load so
+  existing notes/quick-notes are not silently dropped by the schema bump — that migration
+  step is the fix for "notes didn't transfer."
+- **New "People" tab** (2nd tab): a directory built from every session's `people` array,
+  deduplicated and alphabetized; tapping a name jumps to the Program tab pre-filtered to
+  their session(s) via the existing search filter.
+- **New "Notes" tab** (3rd tab, replaces the old My plan tab's role): lists every session
+  that already has a note attached — reusing `sessionCard()` with a `forceOpen` flag that
+  shows the note field without the toggle button — plus the existing quick-notes box and
+  export/import backup controls. A `notesCount` badge mirrors the old `savedCount` badge.
+- Day 2 School Share Session (`d2-school-share`) now lists the five presenter/school
+  pairings Justin provided, each as one `people` string.
+- `owl.js` (Night Flight easter egg) dropped its `is-saved` star overlay since there's
+  nothing to star anymore; `has-note` glow is unchanged.
+- Service worker cache bumped to `v8`. `scripts/storage-roundtrip.mjs` updated for the v2
+  schema. `how-this-works.html` updated (four tabs, no bookmark mentions, v2 schema example).
+- Verified: `npm test` (check + data validation + storage round-trip + static smoke) and
+  `npm run build` both pass.
+
 ## What remains
 
 1. Review the local result and commit/push only after explicit approval.
 2. Enable GitHub Pages with GitHub Actions if the repository setting is not already active.
-3. After publishing, verify the live root, banner, manifest, program search, My plan, and an offline reload.
+3. After publishing, verify the live root, banner, manifest, program search, People, Notes, and an offline reload.

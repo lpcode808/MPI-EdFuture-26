@@ -356,8 +356,8 @@ h1 em {
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  max-width: 35rem;
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 38rem;
   margin: 0 auto;
   border-bottom: 1px solid var(--color-line);
 }
@@ -365,12 +365,12 @@ h1 em {
 .tabs button {
   position: relative;
   min-height: 44px;
-  padding: 0.65rem 0.5rem;
+  padding: 0.65rem 0.4rem;
   border: 0;
   background: transparent;
   color: var(--color-ink-muted);
   font-family: var(--font-ui);
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -579,8 +579,6 @@ h1 em {
 
 .session-actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
   align-items: flex-end;
 }
 
@@ -606,8 +604,6 @@ h1 em {
   stroke-linejoin: round;
   stroke-width: 1.7;
 }
-
-.save-button.is-saved svg { fill: var(--color-primary); stroke: var(--color-primary); }
 
 .notes-field {
   display: grid;
@@ -660,10 +656,44 @@ h1 em {
   font-size: 1.08rem;
 }
 
-#savedList,
+#notesList,
+#peopleList,
 .quick-notes,
 .data-actions,
 #importStatus { max-width: 48rem; margin-right: auto; margin-left: auto; }
+
+.people-directory { border-top: 1px solid var(--color-line); }
+
+.people-row {
+  display: block;
+  width: 100%;
+  padding: 0.85rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-line);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.people-row:hover .people-row-name { color: var(--color-primary-hover); }
+
+.people-row-name {
+  display: block;
+  color: var(--color-primary);
+  font-family: var(--font-ui);
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.people-row-sessions {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--color-ink-muted);
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  letter-spacing: 0.01em;
+}
 
 .saved-day { margin: 2rem 0; }
 .saved-day > h3 {
@@ -855,8 +885,7 @@ footer button {
   .event-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .day-heading { grid-template-columns: 1fr auto; align-items: end; }
   .day-heading > span { text-align: right; }
-  .session-row { grid-template-columns: 5.2rem minmax(0, 1fr) 5.75rem; gap: 1rem; padding: 1.15rem 0; }
-  .session-actions { flex-direction: row; }
+  .session-row { grid-template-columns: 5.2rem minmax(0, 1fr) 3.25rem; gap: 1rem; padding: 1.15rem 0; }
   .session-row h3 { font-size: 1.08rem; }
 }
 

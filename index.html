@@ -8,7 +8,7 @@
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta property="og:title" content="2026 EdFuture Summit pocket program">
-    <meta property="og:description" content="Browse the two-day public program and save a personal plan on your device.">
+    <meta property="og:description" content="Browse the two-day public program, find who's presenting, and keep private notes on your device.">
     <meta property="og:url" content="https://lpcode808.github.io/MPI-EdFuture-26/">
     <meta property="og:image" content="https://lpcode808.github.io/MPI-EdFuture-26/assets/brand/edfuturesummit-banner.webp">
     <title>2026 EdFuture Summit · Pocket Program</title>
@@ -32,7 +32,7 @@
     </header>
 
     <div id="storageBanner" class="storage-banner" role="status" hidden>
-      <p>This guide saves to local storage on your device. In private/incognito mode, that can clear when you close the tab — export a backup from My Plan just in case.</p>
+      <p>This guide saves to local storage on your device. In private/incognito mode, that can clear when you close the tab — export a backup from Notes just in case.</p>
       <button id="storageBannerClose" type="button" aria-label="Dismiss this notice">×</button>
     </div>
 
@@ -56,7 +56,8 @@
         <div class="tab-wrap">
           <div class="tabs" role="tablist" aria-label="Guide sections">
             <button id="tab-agenda" role="tab" aria-selected="true" aria-controls="panel-agenda" tabindex="0">Program</button>
-            <button id="tab-saved" role="tab" aria-selected="false" aria-controls="panel-saved" tabindex="-1">My plan <span id="savedCount" class="count" aria-label="0 saved">0</span></button>
+            <button id="tab-people" role="tab" aria-selected="false" aria-controls="panel-people" tabindex="-1">People</button>
+            <button id="tab-notes" role="tab" aria-selected="false" aria-controls="panel-notes" tabindex="-1">Notes <span id="notesCount" class="count" aria-label="0 notes">0</span></button>
             <button id="tab-info" role="tab" aria-selected="false" aria-controls="panel-info" tabindex="-1">Info</button>
           </div>
         </div>
@@ -74,13 +75,22 @@
           <div id="agendaList"></div>
         </section>
 
-        <section id="panel-saved" class="panel" role="tabpanel" aria-labelledby="tab-saved" hidden>
+        <section id="panel-people" class="panel" role="tabpanel" aria-labelledby="tab-people" hidden>
+          <header class="section-heading">
+            <p class="eyebrow">Single track, one room</p>
+            <h2>Everyone in the program.</h2>
+            <p>Since every session runs for the whole room, there's nothing to plan around — just people worth finding. Tap a name to jump to their session.</p>
+          </header>
+          <div id="peopleList"></div>
+        </section>
+
+        <section id="panel-notes" class="panel" role="tabpanel" aria-labelledby="tab-notes" hidden>
           <header class="section-heading">
             <p class="eyebrow">Stored only in this browser</p>
-            <h2>Your summit, at a glance</h2>
-            <p>Save program items and add private notes. Nothing is sent to a server.</p>
+            <h2>Everything you've written down.</h2>
+            <p>Add a private note from any session in the Program tab — it shows up here too. Nothing is sent to a server.</p>
           </header>
-          <div id="savedList"></div>
+          <div id="notesList"></div>
           <label class="notes-field quick-notes">
             <span>Quick notes</span>
             <textarea id="quickNotes" rows="6" placeholder="Questions, people to find, ideas to bring back…"></textarea>
@@ -151,7 +161,6 @@
           </label>
         </div>
         <div class="session-actions">
-          <button class="save-button" type="button"><span class="visually-hidden">Save session</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6.5 4.5h11v16L12 17l-5.5 3.5z"></path></svg></button>
           <button class="note-button" type="button" aria-expanded="false"><span class="visually-hidden">Add note</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6.5 3.5h8.5l2.5 2.5v14.5h-11z"></path><path d="M15 3.5V6h2.5"></path><path d="M9.5 10.5h5"></path><path d="M9.5 13.5h5"></path><path d="M9.5 16.5h3"></path></svg></button>
         </div>
       </article>

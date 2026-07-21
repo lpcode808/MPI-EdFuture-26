@@ -1,4 +1,4 @@
-const CACHE_NAME = "mpi-edfuture-26-v7";
+const CACHE_NAME = "mpi-edfuture-26-v8";
 const SHELL = [
   "./",
   "./index.html",

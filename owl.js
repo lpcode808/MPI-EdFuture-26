@@ -113,7 +113,6 @@ export function openOwlMode(store) {
 
   const state = store.get();
   const notes = state.sessionNotes;
-  const savedIds = new Set(state.savedSessionIds);
   const { nodes, signs, pathCells, rowCount } = layoutMap();
   const notedCount = nodes.filter((node) => (notes[node.session.id] || "").trim()).length;
   const worldWidth = COLS * CELL;
@@ -183,7 +182,7 @@ export function openOwlMode(store) {
   nodes.forEach((node) => {
     const el = document.createElement("div");
     const hasNote = Boolean((notes[node.session.id] || "").trim());
-    el.className = `owl-node${hasNote ? " has-note" : ""}${savedIds.has(node.session.id) ? " is-saved" : ""}`;
+    el.className = `owl-node${hasNote ? " has-note" : ""}`;
     el.style.transform = `translate(${node.c * CELL}px, ${node.r * CELL}px)`;
     el.innerHTML = pixelSvg(BOOK_SPRITE, 36);
     world.append(el);
@@ -232,7 +231,7 @@ export function openOwlMode(store) {
     head.textContent = [node.day.label, node.session.time, node.session.room].filter(Boolean).join(" · ").toUpperCase();
     const title = document.createElement("p");
     title.className = "owl-line owl-session";
-    title.textContent = node.session.title + (savedIds.has(node.session.id) ? " ★" : "");
+    title.textContent = node.session.title;
     dialog.append(head, title);
     if (node.session.people.length) {
       const people = document.createElement("p");
@@ -547,14 +546,6 @@ function injectStyles() {
 }
 .owl-compass-arrow { display: inline-block; font-size: 0.75rem; }
 .owl-node.has-note { animation: owl-glow 1.6s ease-in-out infinite; }
-.owl-node.is-saved::after {
-  content: "★";
-  position: absolute;
-  top: 2px;
-  right: 5px;
-  color: #ffd98a;
-  font-size: 0.55rem;
-}
 .owl-sign {
   width: auto;
   min-width: ${CELL}px;

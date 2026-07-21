@@ -308,7 +308,7 @@
       <div class="title-block">
         <div class="tb-main">
           <h1>How this guide <em>works</em></h1>
-          <p>A behind-the-scenes tour of the EdFuture 2026 pocket program — how a small pile of plain files becomes an app that renders a schedule, remembers your plan, and keeps working offline. Written for the technically curious; every term of art gets a plain-language gloss.</p>
+          <p>A behind-the-scenes tour of the EdFuture 2026 pocket program — how a small pile of plain files becomes an app that renders a schedule, remembers your notes, and keeps working offline. Written for the technically curious; every term of art gets a plain-language gloss.</p>
         </div>
         <div class="tb-row">
           <div class="tb-cell"><div class="label">Subject</div><div class="value">MPI-EdFuture-26</div></div>
@@ -322,13 +322,13 @@
 
       <h2><span class="num">01</span> What is this site?</h2>
 
-      <p>It's an <strong>unofficial pocket program</strong> for the 2026 EdFuture Summit at Mid-Pacific Institute. One page, three tabs: browse the two-day <strong>Program</strong>, collect sessions into <strong>My plan</strong>, and check <strong>Info</strong>. You can search, filter by day, bookmark sessions, and attach private notes.</p>
+      <p>It's an <strong>unofficial pocket program</strong> for the 2026 EdFuture Summit at Mid-Pacific Institute. One page, four tabs: browse the two-day <strong>Program</strong>, look up who's presenting in <strong>People</strong>, keep private <strong>Notes</strong>, and check <strong>Info</strong>. Because the summit runs single-track — everyone's in the same room — there's nothing to plan around, so the guide skips bookmarking and puts the weight on search, the people directory, and notes.</p>
 
-      <p>The defining constraint: everything you save stays <em>on your device</em>. There is no account, no login, no analytics, and no server that ever sees your plan. That isn't a limitation that snuck in — it's the design.</p>
+      <p>The defining constraint: everything you write stays <em>on your device</em>. There is no account, no login, no analytics, and no server that ever sees your notes. That isn't a limitation that snuck in — it's the design.</p>
 
       <div class="callout">
         <span class="tag">Mental model</span>
-        Think of it as a <strong>paper program with a pencil attached</strong>. The printed part (the schedule) is the same for everyone and comes from the event's published flyers. The pencil marks (your bookmarks and notes) exist only on your copy. Nobody collects the pencils.
+        Think of it as a <strong>paper program with a pencil attached</strong>. The printed part (the schedule) is the same for everyone and comes from the event's published flyers. The pencil marks (your notes) exist only on your copy. Nobody collects the pencils.
       </div>
 
       <h2><span class="num">02</span> The big picture: static files, zero dependencies</h2>
@@ -355,9 +355,9 @@
       <p>Here's the project, starred where it matters. Note the split: the top group ships to attendees; the bottom group is workshop material that never leaves the repository.</p>
 
       <div class="tree"><span class="file">MPI-EdFuture-26/</span>
-├── <span class="star">index.html</span>              <span class="comment">← the shell: header, three tab panels, footer</span>
-├── <span class="star">app.js</span>                  <span class="comment">← the brain: tabs, search, filters, plan, notes</span>
-├── <span class="star">storage.js</span>              <span class="comment">← how your plan is saved on-device</span>
+├── <span class="star">index.html</span>              <span class="comment">← the shell: header, four tab panels, footer</span>
+├── <span class="star">app.js</span>                  <span class="comment">← the brain: tabs, search, filters, people, notes</span>
+├── <span class="star">storage.js</span>              <span class="comment">← how your notes are saved on-device</span>
 ├── <span class="star">data/schedule.js</span>        <span class="comment">← all 29 program items, transcribed from flyers</span>
 ├── data/event.js           <span class="comment">  event facts (dates, venue, official URL)</span>
 ├── styles.css              <span class="comment">  the evergreen night-mode visual system</span>
@@ -389,39 +389,38 @@
         <div class="step"><span class="num">02</span>app.js imports the schedule</div>
         <div class="step"><span class="num">03</span>A template is cloned per session</div>
         <div class="step"><span class="num">04</span>Cards are grouped by day</div>
-        <div class="step"><span class="num">05</span>You search, filter, save</div>
+        <div class="step"><span class="num">05</span>You search, filter, note</div>
       </div>
 
-      <p><code>index.html</code> contains a <code>&lt;template&gt;</code> element — an inert chunk of HTML the browser parses but doesn't display. It's the blank session card: a time slot, a title, a room, a bookmark button, a hidden note field. For each of the 29 sessions, <code>app.js</code> clones the template, fills in the fields, and appends it to the list:</p>
+      <p><code>index.html</code> contains a <code>&lt;template&gt;</code> element — an inert chunk of HTML the browser parses but doesn't display. It's the blank session card: a time slot, a title, a room, a hidden note field. For each of the 29 sessions, <code>app.js</code> clones the template, fills in the fields, and appends it to the list — the Program tab clones it once per session, and the Notes tab reuses the exact same function to render whichever sessions already have a note attached:</p>
 
       <pre><code><span class="k">const</span> node = template.content.firstElementChild.cloneNode(<span class="k">true</span>);
 node.querySelector(<span class="s">".session-time"</span>).textContent = session.time;
 node.querySelector(<span class="s">"h3"</span>).textContent = session.title;
-<span class="c">// … room, presenters, bookmark state …</span></code></pre>
+<span class="c">// … room, presenters, note state …</span></code></pre>
 
-      <p>Search and day filters don't talk to a server either. Typing in the search box just re-runs a filter over the in-memory array — checking your query against each session's title, room, type, and people — and re-renders the list. With 29 items, that's instant.</p>
+      <p>Search and day filters don't talk to a server either. Typing in the search box just re-runs a filter over the in-memory array — checking your query against each session's title, room, type, and people — and re-renders the list. With 29 items, that's instant. The People tab builds its directory the same way: it walks every session's presenter list once, groups repeat names, and tapping a name reuses that same search filter to jump back to their session.</p>
 
-      <p>The three tabs are one page wearing three outfits. Clicking a tab hides two panels and shows one, and writes the choice into the URL after the <code>#</code> symbol (<code>#agenda</code>, <code>#saved</code>, <code>#info</code>) so a shared or reloaded link lands on the right tab. The tabs are real <code>role="tab"</code> controls with full arrow-key navigation — accessibility here is load-bearing, not decorative: 44px touch targets, visible focus rings, reduced-motion support, and status text that screen readers announce.</p>
+      <p>The four tabs are one page wearing four outfits. Clicking a tab hides three panels and shows one, and writes the choice into the URL after the <code>#</code> symbol (<code>#agenda</code>, <code>#people</code>, <code>#notes</code>, <code>#info</code>) so a shared or reloaded link lands on the right tab. The tabs are real <code>role="tab"</code> controls with full arrow-key navigation — accessibility here is load-bearing, not decorative: 44px touch targets, visible focus rings, reduced-motion support, and status text that screen readers announce.</p>
 
-      <h2><span class="num">05</span> Where your plan lives</h2>
+      <h2><span class="num">05</span> Where your notes live</h2>
 
-      <p>Bookmark a session and it's saved via <code>localStorage</code> — a built-in browser feature that lets a site keep small amounts of text on your device. The entire personal state is one JSON blob under one key:</p>
+      <p>Write a note on any session and it's saved via <code>localStorage</code> — a built-in browser feature that lets a site keep small amounts of text on your device. The entire personal state is one JSON blob under one key:</p>
 
-      <pre><code><span class="c">// key: mpi_edfuture_26_attendee_state_v1</span>
+      <pre><code><span class="c">// key: mpi_edfuture_26_attendee_state_v2</span>
 {
-  <span class="s">"schemaVersion"</span>: 1,
-  <span class="s">"savedSessionIds"</span>: [<span class="s">"d1-vibe-coding"</span>, <span class="s">"d2-keynote"</span>],
+  <span class="s">"schemaVersion"</span>: 2,
   <span class="s">"sessionNotes"</span>: { <span class="s">"d2-keynote"</span>: <span class="s">"ask about rubric design"</span> },
   <span class="s">"quickNotes"</span>: <span class="s">"find the TechZone table at lunch"</span>
 }</code></pre>
 
-      <p><code>storage.js</code> wraps this with two disciplines. First, a <strong>schema version</strong> baked into the key, so a future redesign of the format can't misread old data. Second, a <strong>normalize step</strong>: anything read from storage — or imported from a backup file — is filtered down to exactly the expected shape. Unknown fields are dropped, wrong types discarded, duplicate IDs deduplicated. The app never trusts stored data just because it stored it.</p>
+      <p><code>storage.js</code> wraps this with two disciplines. First, a <strong>schema version</strong> baked into the key, so a future redesign of the format can't misread old data — and if it finds nothing under the current key, it looks for the previous version's key once and carries your notes forward instead of quietly losing them. Second, a <strong>normalize step</strong>: anything read from storage — or imported from a backup file — is filtered down to exactly the expected shape. Unknown fields are dropped, wrong types discarded. The app never trusts stored data just because it stored it.</p>
 
       <p>That's also how <strong>Export / Import backup</strong> works. Export wraps your state in an envelope stamped with a format name and the event ID, and downloads it as a JSON file. Import checks both stamps before accepting anything — a backup from a different event, or a random JSON file, is politely refused.</p>
 
       <div class="callout warn">
         <span class="tag">Honest trade-off</span>
-        Device-local means <em>device-local</em>: your phone and your laptop each have their own plan, and clearing browser data erases it. The backup file is the escape hatch — export on one device, import on the other. That's the price of a guide that collects nothing.
+        Device-local means <em>device-local</em>: your phone and your laptop each have their own notes, and clearing browser data erases them. The backup file is the escape hatch — export on one device, import on the other. That's the price of a guide that collects nothing.
       </div>
 
       <h2><span class="num">06</span> Working offline: the service worker</h2>
@@ -476,7 +475,7 @@ node.querySelector(<span class="s">"h3"</span>).textContent = session.title;
 
       <h2><span class="num">09</span> The owl</h2>
 
-      <p>Tap the three-dot brand mark five times fast — or type <code>owl</code> on a keyboard — and the guide opens <strong>Night Flight</strong>, a read-only pixel-art overworld (a nod to the Owlgorithms Club on the Day 2 program). Your saved sessions and notes appear as landmarks on a night map, drawn as inline SVG sprites with a self-hosted pixel font.</p>
+      <p>Tap the three-dot brand mark five times fast — or type <code>owl</code> on a keyboard — and the guide opens <strong>Night Flight</strong>, a read-only pixel-art overworld (a nod to the Owlgorithms Club on the Day 2 program). Your notes appear as glowing landmarks on a night map, drawn as inline SVG sprites with a self-hosted pixel font.</p>
 
       <p>Technically it demonstrates a nice pattern: <strong>lazy loading</strong>. The easter egg lives in its own module, <code>owl.js</code>, which is only downloaded when summoned:</p>
 
@@ -492,9 +491,9 @@ node.querySelector(<span class="s">"h3"</span>).textContent = session.title;
       <p>The project keeps a public roadmap in the repository (<code>docs/roadmap.md</code>), ordered by when the work matters:</p>
 
       <ul>
-        <li><strong>Before the summit</strong> — a real-device shakedown of the live deploy (home-screen install, airplane-mode reload, QR scan, a save/note/export round trip), and re-transcribing if the organizers publish an updated flyer. The service worker delivers corrections to installed attendees one visit after each push.</li>
+        <li><strong>Before the summit</strong> — a real-device shakedown of the live deploy (home-screen install, airplane-mode reload, QR scan, a note/export round trip), and re-transcribing if the organizers publish an updated flyer. The service worker delivers corrections to installed attendees one visit after each push.</li>
         <li><strong>During the summit</strong> — a possible "happening now / up next" strip on the Program tab, built honestly from published start times only ("started at 9:05am" rather than invented durations). Room changes are just a data edit, a test run, and a push.</li>
-        <li><strong>After the summit</strong> — archive mode: a quiet "this event has ended" banner, a freeze on data edits, and the guide kept up as a reference. Saved plans stay readable.</li>
+        <li><strong>After the summit</strong> — archive mode: a quiet "this event has ended" banner, a freeze on data edits, and the guide kept up as a reference. Notes stay readable.</li>
         <li><strong>Parked</strong> — session descriptions, presenter profiles, and calendar export all wait on the organizers publishing the underlying data. The source boundary from section 07 gates the roadmap too: nothing gets built from data the sources don't provide.</li>
       </ul>
 
